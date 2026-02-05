@@ -46,7 +46,6 @@ class AstroLabSampler(ABC):
         Returns:
             PyG Data or HeteroData object
         """
-        pass
 
     @abstractmethod
     def create_dataloader(
@@ -67,7 +66,6 @@ class AstroLabSampler(ABC):
         Returns:
             PyG DataLoader
         """
-        pass
 
     def get_sampling_info(self) -> Dict[str, Any]:
         """Get sampling statistics and information.

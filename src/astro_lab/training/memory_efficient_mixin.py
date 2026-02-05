@@ -61,7 +61,7 @@ class MemoryEfficientMixin:
         Enable gradient checkpointing for memory efficiency.
         """
         try:
-            import torch.utils.checkpoint as checkpoint
+            pass
 
             self._gradient_checkpointing = True
         except ImportError:

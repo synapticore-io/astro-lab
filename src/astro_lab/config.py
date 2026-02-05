@@ -93,7 +93,7 @@ def get_task_config(task: str) -> dict:
         return {
             "task": task,
             "conv_type": "gcn",
-            "pooling": "mean" if "graph" in task else None
+            "pooling": "mean" if "graph" in task else None,
         }
     return tasks[task]
 
@@ -120,47 +120,47 @@ def get_combined_config(survey: str, task: str) -> Dict[str, Any]:
     model_config = get_model_config()
     training_config = get_training_config()
     mlflow_config = get_mlflow_config()
-    
+
     # Get survey-specific config
     survey_config = get_survey_config(survey)
-    
+
     # Get task-specific config
     task_config = get_task_config(task)
-    
+
     # Merge configs with priority: Survey > Task > General
     combined = {}
-    
+
     # Base configs
     combined.update(data_config)
     combined.update(model_config)
     combined.update(training_config)
     combined.update(mlflow_config)
-    
+
     # Task-specific overrides
     combined.update(task_config)
-    
+
     # Survey-specific overrides (highest priority for survey fields)
     # But don't override all fields, just the ones that make sense
     survey_overrides = {
-        'batch_size': survey_config.get('batch_size'),
-        'k_neighbors': survey_config.get('k_neighbors'),
-        'precision': survey_config.get('precision'),
-        'gradient_clip_val': survey_config.get('gradient_clip_val'),
-        'experiment_name': survey_config.get('experiment_name'),
+        "batch_size": survey_config.get("batch_size"),
+        "k_neighbors": survey_config.get("k_neighbors"),
+        "precision": survey_config.get("precision"),
+        "gradient_clip_val": survey_config.get("gradient_clip_val"),
+        "experiment_name": survey_config.get("experiment_name"),
     }
-    
+
     # Add non-None survey overrides
     for key, value in survey_overrides.items():
         if value is not None:
             combined[key] = value
-    
+
     # If survey has recommended model and no model type specified yet, use it
-    if 'recommended_model' in survey_config and 'conv_type' not in combined:
-        combined.update(survey_config['recommended_model'])
-    
+    if "recommended_model" in survey_config and "conv_type" not in combined:
+        combined.update(survey_config["recommended_model"])
+
     # Ensure task is set
-    combined['task'] = task
-    
+    combined["task"] = task
+
     return combined
 
 

@@ -1,0 +1,22 @@
+{"rule":"Semgrep Finding: yaml.github-actions.security.run-shell-injection.run-shell-injection","severity":"error"}
+{"rule":"Semgrep Finding: yaml.github-actions.security.run-shell-injection.run-shell-injection","severity":"error"}
+{"rule":"Semgrep Finding: yaml.github-actions.security.run-shell-injection.run-shell-injection","severity":"error"}
+{"rule":"Semgrep Finding: yaml.github-actions.security.run-shell-injection.run-shell-injection","severity":"error"}
+{"rule":"Semgrep Finding: yaml.github-actions.security.run-shell-injection.run-shell-injection","severity":"error"}
+{"rule":"Unreachable code","severity":"warning"}
+{"rule":"Unused local variable","severity":"note"}
+{"rule":"Semgrep Finding: yaml.github-actions.security.run-shell-injection.run-shell-injection","severity":"error"}
+{"rule":"Semgrep Finding: yaml.github-actions.security.run-shell-injection.run-shell-injection","severity":"error"}
+{"rule":"Semgrep Finding: yaml.github-actions.security.run-shell-injection.run-shell-injection","severity":"error"}
+{"rule":"Semgrep Finding: yaml.github-actions.security.run-shell-injection.run-shell-injection","severity":"error"}
+{"rule":"Semgrep Finding: yaml.github-actions.security.run-shell-injection.run-shell-injection","severity":"error"}
+{"rule":"Use of the return value of a procedure","severity":"warning"}
+{"rule":"Wrong name for an argument in a call","severity":"error"}
+{"rule":"Empty except","severity":"note"}
+{"rule":"Unused import","severity":"note"}
+{"rule":"Unused import","severity":"note"}
+{"rule":"Unused local variable","severity":"note"}
+{"rule":"Unused local variable","severity":"note"}
+{"rule":"Unused local variable","severity":"note"}
+{"rule":"Unused local variable","severity":"note"}
+{"rule":"Unused local variable","severity":"note"}

@@ -85,7 +85,8 @@ class AlbpyForceFieldShaderGroup(bpy.types.ShaderNodeGroup):
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyForceFieldShaderGroup)
 
-
     bpy.utils.register_class(AlbpyForceFieldShaderGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyForceFieldShaderGroup)

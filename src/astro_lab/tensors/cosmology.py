@@ -51,7 +51,9 @@ class CosmologyTensorDict(AstroTensorDict, NormalizationMixin, ValidationMixin):
             observed_magnitudes: Observed magnitudes for distance calculations
         """
         if redshifts.dim() != 1:
-            raise ValueError(f"Redshifts must be 1D tensor, got shape {redshifts.shape}")
+            raise ValueError(
+                f"Redshifts must be 1D tensor, got shape {redshifts.shape}"
+            )
 
         n_objects = redshifts.shape[0]
 
@@ -105,14 +107,16 @@ class CosmologyTensorDict(AstroTensorDict, NormalizationMixin, ValidationMixin):
         """Source redshifts."""
         return self["redshifts"]
 
-    def extract_features(self, feature_types: Optional[List[str]] = None, **kwargs) -> Dict[str, torch.Tensor]:
+    def extract_features(
+        self, feature_types: Optional[List[str]] = None, **kwargs
+    ) -> Dict[str, torch.Tensor]:
         """
         Extract cosmological features from the TensorDict.
-        
+
         Args:
             feature_types: Types of features to extract ('cosmological', 'distances', 'times')
             **kwargs: Additional extraction parameters
-            
+
         Returns:
             Dictionary of extracted cosmological features
         """
@@ -132,8 +136,12 @@ class CosmologyTensorDict(AstroTensorDict, NormalizationMixin, ValidationMixin):
             if "luminosity_distance" not in self:
                 self.compute_distances()
 
-            for dist_key in ["luminosity_distance", "angular_diameter_distance",
-                           "comoving_distance", "distance_modulus"]:
+            for dist_key in [
+                "luminosity_distance",
+                "angular_diameter_distance",
+                "comoving_distance",
+                "distance_modulus",
+            ]:
                 if dist_key in self:
                     features[dist_key] = self[dist_key]
 
@@ -159,15 +167,21 @@ class CosmologyTensorDict(AstroTensorDict, NormalizationMixin, ValidationMixin):
 
         # Compute distances using astropy cosmology
         luminosity_distance = self.cosmology.luminosity_distance(z).to_value("Mpc")
-        angular_diameter_distance = self.cosmology.angular_diameter_distance(z).to_value("Mpc")
+        angular_diameter_distance = self.cosmology.angular_diameter_distance(
+            z
+        ).to_value("Mpc")
         comoving_distance = self.cosmology.comoving_distance(z).to_value("Mpc")
 
         # Distance modulus
         distance_modulus = 5 * np.log10(luminosity_distance * 1e5)  # Convert Mpc to pc
 
         distances = {
-            "luminosity_distance": torch.tensor(luminosity_distance, dtype=torch.float32),
-            "angular_diameter_distance": torch.tensor(angular_diameter_distance, dtype=torch.float32),
+            "luminosity_distance": torch.tensor(
+                luminosity_distance, dtype=torch.float32
+            ),
+            "angular_diameter_distance": torch.tensor(
+                angular_diameter_distance, dtype=torch.float32
+            ),
             "comoving_distance": torch.tensor(comoving_distance, dtype=torch.float32),
             "distance_modulus": torch.tensor(distance_modulus, dtype=torch.float32),
         }

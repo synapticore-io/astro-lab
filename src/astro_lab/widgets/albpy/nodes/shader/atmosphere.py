@@ -139,7 +139,8 @@ def apply_atmosphere_preset(material: bpy.types.Material, preset_name: str) -> N
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyAtmosphereShaderGroup)
 
-
     bpy.utils.register_class(AlbpyAtmosphereShaderGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyAtmosphereShaderGroup)

@@ -110,7 +110,8 @@ def apply_lens_flare_preset(
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyLensFlareCompositingGroup)
 
-
     bpy.utils.register_class(AlbpyLensFlareCompositingGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyLensFlareCompositingGroup)

@@ -143,7 +143,8 @@ def apply_color_grading_preset(
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyColorGradingCompositingGroup)
 
-
     bpy.utils.register_class(AlbpyColorGradingCompositingGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyColorGradingCompositingGroup)

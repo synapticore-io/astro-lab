@@ -7,7 +7,7 @@ Configuration for all available training options, optimizers, and schedulers.
 
 import marimo as mo
 
-from astro_lab.config import get_config, get_task_config, get_training_config
+from astro_lab.config import get_config, get_training_config
 
 
 def create_training_config():

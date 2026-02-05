@@ -45,7 +45,7 @@ class AstroLabInMemoryDataset(InMemoryDataset):
     Universal in-memory dataset for astronomical data using SurveyTensorDict and PyG integration.
     Integrates collectors for downloading, samplers for graph construction, and transforms for
     preprocessing.
-    
+
     Now with TensorDict optimizations:
     - Uses AstroTensorDict methods for memory-mapping
     - Consolidates batches for faster GPU transfer
@@ -251,10 +251,10 @@ class AstroLabInMemoryDataset(InMemoryDataset):
             num_nodes=1,
         )
         placeholder_slices = {
-            'x': torch.tensor([0, 1], dtype=torch.long),
-            'edge_index': torch.tensor([0, 0], dtype=torch.long),
+            "x": torch.tensor([0, 1], dtype=torch.long),
+            "edge_index": torch.tensor([0, 0], dtype=torch.long),
         }
-        
+
         # Save the placeholder .pt file (PyG InMemoryDataset format)
         torch.save((placeholder_data, placeholder_slices), self.processed_paths[0])
 
@@ -432,13 +432,13 @@ class AstroLabInMemoryDataset(InMemoryDataset):
 
     def _tensordict_to_pyg(self, tensordict: TensorDict) -> Data:
         """Convert TensorDict to PyG Data object.
-        
+
         Now uses consolidate() for faster GPU transfer if optimization is enabled.
         """
         if self.use_tensordict_optimization:
             # Consolidate for faster transfer
             tensordict = tensordict.consolidate()
-            
+
         data_dict = {}
         for key, value in tensordict.items():
             data_dict[key] = value
@@ -453,11 +453,11 @@ class AstroLabInMemoryDataset(InMemoryDataset):
     def _pyg_to_tensordict(self, pyg_data: Data) -> TensorDict:
         """Convert PyG Data to TensorDict."""
         td = TensorDict({k: v for k, v in pyg_data.items()})
-        
+
         if self.use_tensordict_optimization:
             # Pin memory for faster GPU transfer
             td = td.pin_memory_()
-            
+
         return td
 
     def _load_data(self) -> Tuple[Any, Any]:
@@ -474,7 +474,10 @@ class AstroLabInMemoryDataset(InMemoryDataset):
                     if memmap_path.exists():
                         # Load memory-mapped TensorDict
                         from astro_lab.tensors import AstroTensorDict
-                        self._memmap_tensordict = AstroTensorDict.from_checkpoint(memmap_path)
+
+                        self._memmap_tensordict = AstroTensorDict.from_checkpoint(
+                            memmap_path
+                        )
                 return None, None
             else:
                 # Fallback for non-streaming datasets
@@ -492,7 +495,7 @@ class AstroLabInMemoryDataset(InMemoryDataset):
 
     def get(self, idx: int) -> Union[Data, HeteroData]:
         """Get a single graph by index using streaming - delegate to sampler.
-        
+
         Now with TensorDict optimizations:
         - Uses memory-mapped storage if available
         - Consolidates data for faster GPU transfer
@@ -553,16 +556,18 @@ class AstroLabInMemoryDataset(InMemoryDataset):
         if self.use_tensordict_optimization:
             survey_td = self._torch_data_to_survey_tensordict(torch_data)
             # Add graph structure info
-            survey_td["_graph_info"] = TensorDict({
-                "coordinates": coordinates,
-                "features": features,
-                "y": labels,
-                "idx": torch.tensor(idx),
-            })
-            
+            survey_td["_graph_info"] = TensorDict(
+                {
+                    "coordinates": coordinates,
+                    "features": features,
+                    "y": labels,
+                    "idx": torch.tensor(idx),
+                }
+            )
+
             # Consolidate for faster GPU transfer
             survey_td = survey_td.consolidate()
-            
+
             # Delegate to sampler with TensorDict
             if self.sampler:
                 graph_data = self.sampler.create_graph(
@@ -591,7 +596,7 @@ class AstroLabInMemoryDataset(InMemoryDataset):
             graph_data = self.transform(graph_data)
 
         return graph_data
-    
+
     def _get_from_memmap(self, idx: int) -> Data:
         """Get data from memory-mapped TensorDict."""
         # This would retrieve from memory-mapped storage
@@ -643,31 +648,32 @@ class AstroLabInMemoryDataset(InMemoryDataset):
             info["num_classes"] = 6 if self.survey_name == "gaia" else 2
 
         return info
-    
+
     def create_memmap_cache(self, num_workers: int = 4):
         """Create memory-mapped cache for entire dataset.
-        
+
         Uses AstroTensorDict.to_memmap() for efficient storage.
         """
         if not self.use_tensordict_optimization:
             return
-            
+
         memmap_path = Path(self.processed_paths[2])
-        
+
         # Collect all data as TensorDicts
         all_data = []
         for i in range(len(self)):
             data = self.get(i)
             td = self._pyg_to_tensordict(data)
             all_data.append(td)
-            
+
         # Use lazy stack for efficiency
         from astro_lab.tensors import AstroTensorDict
+
         stacked = AstroTensorDict.lazy_stack(all_data)
-        
+
         # Convert to memory-mapped
         stacked.to_memmap(memmap_path, num_threads=num_workers)
-        
+
         print(f"Created memory-mapped cache at {memmap_path}")
 
 
@@ -686,7 +692,7 @@ def create_dataset(
     use_tensordict_optimization: bool = True,
 ):
     """Factory function to create an AstroLabInMemoryDataset with the given parameters.
-    
+
     Now with TensorDict optimizations enabled by default.
     """
     return AstroLabInMemoryDataset(

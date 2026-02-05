@@ -6,13 +6,14 @@ TensorDict for survey data containing multiple components
 """
 
 from typing import Any, Dict, List, Optional
+
 import torch
 
 from .base import AstroTensorDict
 from .image import ImageTensorDict
+from .mixins import ValidationMixin
 from .photometric import PhotometricTensorDict
 from .spatial import SpatialTensorDict
-from .mixins import ValidationMixin
 
 
 class SurveyTensorDict(AstroTensorDict, ValidationMixin):
@@ -76,14 +77,16 @@ class SurveyTensorDict(AstroTensorDict, ValidationMixin):
 
         super().__init__(data, batch_size=batch_size, **kwargs)
 
-    def extract_features(self, feature_types: Optional[List[str]] = None, **kwargs) -> Dict[str, torch.Tensor]:
+    def extract_features(
+        self, feature_types: Optional[List[str]] = None, **kwargs
+    ) -> Dict[str, torch.Tensor]:
         """
         Extract survey features from all available components.
-        
+
         Args:
             feature_types: Types of features to extract ('survey', 'spatial', 'photometric', 'image')
             **kwargs: Additional extraction parameters
-            
+
         Returns:
             Dictionary of extracted features from all components
         """
@@ -100,7 +103,9 @@ class SurveyTensorDict(AstroTensorDict, ValidationMixin):
 
         if feature_types is None or "photometric" in feature_types:
             if self.has_photometric():
-                photo_features = self.photometric.extract_features(["photometric"], **kwargs)
+                photo_features = self.photometric.extract_features(
+                    ["photometric"], **kwargs
+                )
                 for key, value in photo_features.items():
                     features[f"photometric_{key}"] = value
 
@@ -112,7 +117,9 @@ class SurveyTensorDict(AstroTensorDict, ValidationMixin):
 
         if feature_types is None or "survey" in feature_types:
             # Survey-level aggregated features
-            features["survey_name"] = torch.tensor(hash(self.survey_name) % 10000, dtype=torch.float32)
+            features["survey_name"] = torch.tensor(
+                hash(self.survey_name) % 10000, dtype=torch.float32
+            )
             features["has_spatial"] = torch.tensor(float(self.has_spatial()))
             features["has_photometric"] = torch.tensor(float(self.has_photometric()))
             features["has_image"] = torch.tensor(float(self.has_image()))

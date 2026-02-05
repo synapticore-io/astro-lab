@@ -5,7 +5,6 @@ Temporal Encoder Layers for AstroLab Models
 Temporal encoding layers for time series and sequential data.
 """
 
-
 import torch.nn as nn
 from torch import Tensor
 

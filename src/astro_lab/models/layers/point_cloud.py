@@ -125,7 +125,7 @@ class AstroPointCloudLayer(BaseGraphLayer):
                     nn.Linear(self.out_channels, 64),
                     nn.ReLU(),
                     nn.Linear(64, self.out_channels),
-                )
+                ),
             )
 
         elif layer_type == "gravnet":

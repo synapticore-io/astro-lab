@@ -18,7 +18,7 @@ DEFAULT_COSMOLOGY = FlatLambdaCDM(H0=70, Om0=0.3)
 
 class AstroLabDataPreprocessor(ABC):
     """Enhanced base class with unified 3D coordinate handling and survey column mapping.
-    
+
     This base class ensures all surveys produce real 3D coordinates (x, y, z) for spatial analysis
     and standardizes field mapping across different astronomical surveys.
     """
@@ -41,27 +41,22 @@ class AstroLabDataPreprocessor(ABC):
     @abstractmethod
     def filter(self, df: pl.DataFrame) -> pl.DataFrame:
         """Filter dataframe to remove low-quality or unwanted data."""
-        pass
 
     @abstractmethod
     def transform(self, df: pl.DataFrame) -> pl.DataFrame:
         """Transform column values and add derived columns."""
-        pass
 
     @abstractmethod
     def extract_features(self, df: pl.DataFrame) -> pl.DataFrame:
         """Extract features for machine learning."""
-        pass
 
     @abstractmethod
     def get_survey_name(self) -> str:
         """Get the survey name for this preprocessor."""
-        pass
 
     @abstractmethod
     def get_object_type(self) -> str:
         """Get the primary object type for this survey."""
-        pass
 
     def map_and_select_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Map survey columns to standard names and select relevant columns."""
@@ -160,13 +155,13 @@ class AstroLabDataPreprocessor(ABC):
 
     def ensure_3d_coordinates(self, df: pl.DataFrame) -> pl.DataFrame:
         """Ensure that the DataFrame has real 3D spatial coordinates (x, y, z).
-        
+
         This method ensures all astronomical data has proper 3D Cartesian coordinates
         for spatial analysis and cosmic web processing.
-        
+
         Returns:
             DataFrame with x, y, z columns added if possible
-            
+
         Raises:
             ValueError: If coordinates cannot be derived from available data
         """
@@ -178,80 +173,106 @@ class AstroLabDataPreprocessor(ABC):
         # Try to compute from ra, dec, distance
         if all(col in df.columns for col in ["ra", "dec"]):
             if "distance_pc" in df.columns:
-                logger.info("Converting spherical coordinates (ra, dec, distance_pc) to Cartesian")
-                from astro_lab.data.transforms.astronomical import spherical_to_cartesian
+                logger.info(
+                    "Converting spherical coordinates (ra, dec, distance_pc) to Cartesian"
+                )
+                from astro_lab.data.transforms.astronomical import (
+                    spherical_to_cartesian,
+                )
 
                 x, y, z = spherical_to_cartesian(df["ra"], df["dec"], df["distance_pc"])
-                df = df.with_columns([
-                    pl.Series("x", x),
-                    pl.Series("y", y),
-                    pl.Series("z", z),
-                ])
-                
+                df = df.with_columns(
+                    [
+                        pl.Series("x", x),
+                        pl.Series("y", y),
+                        pl.Series("z", z),
+                    ]
+                )
+
                 # Log coordinate statistics
                 self._coordinate_stats = {
-                    "coordinate_system": "cartesian_from_spherical", 
+                    "coordinate_system": "cartesian_from_spherical",
                     "x_range": [float(x.min()), float(x.max())],
                     "y_range": [float(y.min()), float(y.max())],
                     "z_range": [float(z.min()), float(z.max())],
                     "distance_range_pc": [
                         float(df["distance_pc"].min()),
-                        float(df["distance_pc"].max())
-                    ]
+                        float(df["distance_pc"].max()),
+                    ],
                 }
-                logger.info(f"Coordinate conversion successful: {self._coordinate_stats}")
+                logger.info(
+                    f"Coordinate conversion successful: {self._coordinate_stats}"
+                )
                 return df
-                
+
             elif "distance_mpc" in df.columns:
-                logger.info("Converting spherical coordinates (ra, dec, distance_mpc) to Cartesian")
-                from astro_lab.data.transforms.astronomical import spherical_to_cartesian
+                logger.info(
+                    "Converting spherical coordinates (ra, dec, distance_mpc) to Cartesian"
+                )
+                from astro_lab.data.transforms.astronomical import (
+                    spherical_to_cartesian,
+                )
 
                 x, y, z = spherical_to_cartesian(
                     df["ra"], df["dec"], df["distance_mpc"] * 1e6
                 )
-                df = df.with_columns([
-                    pl.Series("x", x),
-                    pl.Series("y", y),
-                    pl.Series("z", z),
-                ])
-                return df
-                
-            elif "z" in df.columns:
-                # Convert redshift to distance using cosmology
-                logger.info("Converting redshift to distance for coordinate calculation")
-                df = self._redshift_to_distance(df)
-                
-                if "distance_pc" in df.columns:
-                    from astro_lab.data.transforms.astronomical import spherical_to_cartesian
-                    
-                    x, y, z = spherical_to_cartesian(df["ra"], df["dec"], df["distance_pc"])
-                    df = df.with_columns([
+                df = df.with_columns(
+                    [
                         pl.Series("x", x),
                         pl.Series("y", y),
                         pl.Series("z", z),
-                    ])
+                    ]
+                )
+                return df
+
+            elif "z" in df.columns:
+                # Convert redshift to distance using cosmology
+                logger.info(
+                    "Converting redshift to distance for coordinate calculation"
+                )
+                df = self._redshift_to_distance(df)
+
+                if "distance_pc" in df.columns:
+                    from astro_lab.data.transforms.astronomical import (
+                        spherical_to_cartesian,
+                    )
+
+                    x, y, z = spherical_to_cartesian(
+                        df["ra"], df["dec"], df["distance_pc"]
+                    )
+                    df = df.with_columns(
+                        [
+                            pl.Series("x", x),
+                            pl.Series("y", y),
+                            pl.Series("z", z),
+                        ]
+                    )
                     return df
 
         # Try parallax conversion for Gaia-like data
         if "parallax" in df.columns:
             logger.info("Converting parallax to distance for coordinate calculation")
             df = self._parallax_to_distance(df)
-            
+
             if all(col in df.columns for col in ["ra", "dec", "distance_pc"]):
-                from astro_lab.data.transforms.astronomical import spherical_to_cartesian
-                
+                from astro_lab.data.transforms.astronomical import (
+                    spherical_to_cartesian,
+                )
+
                 x, y, z = spherical_to_cartesian(df["ra"], df["dec"], df["distance_pc"])
-                df = df.with_columns([
-                    pl.Series("x", x),
-                    pl.Series("y", y),
-                    pl.Series("z", z),
-                ])
+                df = df.with_columns(
+                    [
+                        pl.Series("x", x),
+                        pl.Series("y", y),
+                        pl.Series("z", z),
+                    ]
+                )
                 return df
 
         # If we get here, we couldn't derive 3D coordinates
         logger.error("Cannot derive 3D coordinates from available data")
         logger.error(f"Available columns: {df.columns}")
-        
+
         raise ValueError(
             f"Cannot derive real 3D coordinates for {self.get_survey_name()} data. "
             f"Available columns: {list(df.columns)}. "
@@ -262,12 +283,14 @@ class AstroLabDataPreprocessor(ABC):
         self, df: pl.DataFrame, parallax_col: str = "parallax"
     ) -> pl.DataFrame:
         """Convert parallax to distance in parsecs."""
-        df = df.with_columns([
-            pl.when(pl.col(parallax_col) > 0.001)
-            .then(1000.0 / pl.col(parallax_col))
-            .otherwise(pl.lit(None))
-            .alias("distance_pc")
-        ])
+        df = df.with_columns(
+            [
+                pl.when(pl.col(parallax_col) > 0.001)
+                .then(1000.0 / pl.col(parallax_col))
+                .otherwise(pl.lit(None))
+                .alias("distance_pc")
+            ]
+        )
 
         # Remove objects with invalid distances
         initial_count = len(df)

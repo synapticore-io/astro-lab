@@ -224,7 +224,8 @@ class ALBPY_OT_CreateRadarChart(Operator):
 def register():
     # REMOVED: bpy.utils.register_class(ALBPY_OT_CreateRadarChart)
 
-
     bpy.utils.register_class(ALBPY_OT_CreateRadarChart)
+
+
 def unregister():
     bpy.utils.unregister_class(ALBPY_OT_CreateRadarChart)

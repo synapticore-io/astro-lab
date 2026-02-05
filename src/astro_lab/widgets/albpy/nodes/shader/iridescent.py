@@ -64,8 +64,9 @@ class AlbpyIridescentShaderGroup(bpy.types.ShaderNodeGroup):
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyIridescentShaderGroup)
 
-
     bpy.utils.register_class(AlbpyIridescentShaderGroup)
+
+
 # Iridescent material presets
 IRIDESCENT_PRESETS = {
     "luxury_teal": {

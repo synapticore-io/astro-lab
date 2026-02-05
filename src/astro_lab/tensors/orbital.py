@@ -1,4 +1,4 @@
-﻿"""
+"""
 Orbital TensorDict for orbital mechanics calculations.
 
 TensorDict for orbital elements and orbital mechanics calculations
@@ -7,7 +7,6 @@ with proper Keplerian mechanics and orbital propagation using real astronomical 
 
 from __future__ import annotations
 
-import math
 from typing import Dict, List, Optional
 
 import torch
@@ -19,7 +18,7 @@ from .mixins import ValidationMixin
 class OrbitTensorDict(AstroTensorDict, ValidationMixin):
     """
     TensorDict for orbital elements and mechanics.
-    
+
     Handles real orbital data for asteroids, comets, and exoplanets
     with proper Keplerian orbital mechanics.
 
@@ -97,7 +96,7 @@ class OrbitTensorDict(AstroTensorDict, ValidationMixin):
         Extract orbital features from real orbital data.
 
         Args:
-            feature_types: Types of features to extract 
+            feature_types: Types of features to extract
                          ('orbital', 'dynamics', 'classification', 'temporal')
             **kwargs: Additional extraction parameters
 
@@ -126,10 +125,10 @@ class OrbitTensorDict(AstroTensorDict, ValidationMixin):
             features["perihelion_distance"] = self.semi_major_axis * (
                 1 - self.eccentricity
             )
-            
+
             # Specific orbital energy (negative for bound orbits)
             features["orbital_energy"] = -1.0 / (2 * self.semi_major_axis)
-            
+
             # Specific angular momentum
             features["angular_momentum"] = torch.sqrt(
                 self.semi_major_axis * (1 - self.eccentricity**2)
@@ -153,7 +152,7 @@ class OrbitTensorDict(AstroTensorDict, ValidationMixin):
             features["is_highly_eccentric"] = (e >= 0.9).float()
             features["is_parabolic"] = ((e >= 0.99) & (e < 1.01)).float()
             features["is_hyperbolic"] = (e > 1.01).float()
-            
+
             # Inclination classification
             features["is_low_inclination"] = (i < 10.0).float()
             features["is_moderate_inclination"] = ((i >= 10.0) & (i < 30.0)).float()
@@ -162,7 +161,7 @@ class OrbitTensorDict(AstroTensorDict, ValidationMixin):
         if feature_types is None or "temporal" in feature_types:
             # Temporal features based on epoch
             features["epoch_jd"] = self["epoch"]
-            
+
             # Years since J2000.0
             features["years_since_j2000"] = (self["epoch"] - 2451545.0) / 365.25
 
@@ -201,7 +200,7 @@ class OrbitTensorDict(AstroTensorDict, ValidationMixin):
     def compute_period(self) -> torch.Tensor:
         """
         Calculate orbital period using Kepler's Third Law.
-        
+
         Returns:
             Orbital period in years
         """
@@ -212,7 +211,7 @@ class OrbitTensorDict(AstroTensorDict, ValidationMixin):
     def compute_mean_motion(self) -> torch.Tensor:
         """
         Calculate mean motion (degrees per day).
-        
+
         Returns:
             Mean motion in degrees/day
         """
@@ -222,29 +221,29 @@ class OrbitTensorDict(AstroTensorDict, ValidationMixin):
     def solve_kepler_equation(self, mean_anomaly_deg: torch.Tensor) -> torch.Tensor:
         """
         Solve Kepler's equation for eccentric anomaly using Newton-Raphson method.
-        
+
         Args:
             mean_anomaly_deg: Mean anomaly in degrees
-            
+
         Returns:
             Eccentric anomaly in degrees
         """
         M = torch.deg2rad(mean_anomaly_deg)
         e = self.eccentricity
-        
+
         # Initial guess
         E = M.clone()
-        
+
         # Newton-Raphson iteration
         for _ in range(10):  # Usually converges in 3-5 iterations
             f = E - e * torch.sin(E) - M
             fp = 1 - e * torch.cos(E)
             E = E - f / fp
-            
+
             # Check convergence
             if torch.max(torch.abs(f)) < 1e-12:
                 break
-                
+
         return torch.rad2deg(E)
 
     def to_cartesian(self, time_jd: Optional[torch.Tensor] = None) -> torch.Tensor:
@@ -269,12 +268,12 @@ class OrbitTensorDict(AstroTensorDict, ValidationMixin):
         # Solve Kepler's equation for eccentric anomaly
         E = self.solve_kepler_equation(M)
         E_rad = torch.deg2rad(E)
-        
+
         # Calculate true anomaly
         e = self.eccentricity
         f = 2 * torch.atan2(
             torch.sqrt(1 + e) * torch.sin(E_rad / 2),
-            torch.sqrt(1 - e) * torch.cos(E_rad / 2)
+            torch.sqrt(1 - e) * torch.cos(E_rad / 2),
         )
 
         # Calculate distance
@@ -289,7 +288,7 @@ class OrbitTensorDict(AstroTensorDict, ValidationMixin):
         # Velocity in orbital plane (using proper orbital mechanics)
         mu = 1.0  # Standard gravitational parameter (in AU³/year²)
         h = torch.sqrt(mu * a * (1 - e**2))  # Specific angular momentum
-        
+
         vx_orb = -(mu / h) * torch.sin(f)
         vy_orb = (mu / h) * (e + torch.cos(f))
         vz_orb = torch.zeros_like(vx_orb)
@@ -352,30 +351,32 @@ class OrbitTensorDict(AstroTensorDict, ValidationMixin):
             central_body=self["meta"]["central_body"],
         )
 
-    def get_orbital_position_at_phase(self, orbital_phase: torch.Tensor) -> torch.Tensor:
+    def get_orbital_position_at_phase(
+        self, orbital_phase: torch.Tensor
+    ) -> torch.Tensor:
         """
         Get orbital position for given orbital phase (0-1).
-        
+
         Args:
             orbital_phase: Orbital phase from 0 to 1
-            
+
         Returns:
             [N, 3] Cartesian coordinates
         """
         # Convert phase to mean anomaly
         M_new = orbital_phase * 360.0  # degrees
-        
+
         # Use current orbital elements but with new mean anomaly
         temp_elements = self["elements"].clone()
         temp_elements[..., 5] = M_new
-        
+
         temp_orbit = OrbitTensorDict(
             elements=temp_elements,
             epoch=self["epoch"],
             frame=self["meta"]["frame"],
             central_body=self["meta"]["central_body"],
         )
-        
+
         cartesian = temp_orbit.to_cartesian()
         return cartesian[..., :3]  # Just position, not velocity
 
@@ -387,7 +388,7 @@ def from_kepler_elements(
     longitudes_asc_node: Optional[torch.Tensor] = None,
     arguments_periapsis: Optional[torch.Tensor] = None,
     mean_anomalies: Optional[torch.Tensor] = None,
-    **kwargs
+    **kwargs,
 ) -> OrbitTensorDict:
     """
     Create OrbitTensorDict from individual orbital elements.
@@ -414,14 +415,17 @@ def from_kepler_elements(
         mean_anomalies = torch.zeros(n_objects)
 
     # Create complete orbital elements tensor
-    elements = torch.stack([
-        semi_major_axes,
-        eccentricities,
-        inclinations,
-        longitudes_asc_node,
-        arguments_periapsis,
-        mean_anomalies,
-    ], dim=-1)
+    elements = torch.stack(
+        [
+            semi_major_axes,
+            eccentricities,
+            inclinations,
+            longitudes_asc_node,
+            arguments_periapsis,
+            mean_anomalies,
+        ],
+        dim=-1,
+    )
 
     return OrbitTensorDict(elements, **kwargs)
 
@@ -429,10 +433,10 @@ def from_kepler_elements(
 def from_asteroid_database(asteroid_data: Dict[str, torch.Tensor]) -> OrbitTensorDict:
     """
     Create OrbitTensorDict from real asteroid database format.
-    
+
     Args:
         asteroid_data: Dictionary with asteroid orbital elements
-        
+
     Returns:
         OrbitTensorDict with real asteroid orbits
     """
@@ -444,5 +448,5 @@ def from_asteroid_database(asteroid_data: Dict[str, torch.Tensor]) -> OrbitTenso
         arguments_periapsis=asteroid_data.get("omega", None),
         mean_anomalies=asteroid_data.get("M", None),
         frame="ecliptic",
-        central_body="Sun"
+        central_body="Sun",
     )

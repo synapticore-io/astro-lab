@@ -18,7 +18,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.visualization import quantity_support
 
-from astro_lab.widgets.enhanced import AstronomicalTensorBridge, to_pyvista
+from astro_lab.widgets.enhanced import to_pyvista
 
 # Enable quantity support
 quantity_support()

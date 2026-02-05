@@ -298,22 +298,44 @@ def train_model(
         "accelerator": "gpu" if cuda_available else "cpu",
         "precision": "32-true",
     }
-    
+
     # Get config values with defaults
     model_type = model_type or config.get("conv_type") or config.get("model_type")
-    experiment_name = str(config.get("experiment_name", config_defaults["experiment_name"]))
+    experiment_name = str(
+        config.get("experiment_name", config_defaults["experiment_name"])
+    )
     devices = config.get("devices", config_defaults["devices"])
     accelerator = str(config.get("accelerator", config_defaults["accelerator"]))
-    gradient_clip_val = float(config.get("gradient_clip_val", config_defaults["gradient_clip_val"]))
+    gradient_clip_val = float(
+        config.get("gradient_clip_val", config_defaults["gradient_clip_val"])
+    )
     max_epochs = int(config.get("max_epochs", config_defaults["max_epochs"]))
-    accumulate_grad_batches = int(config.get("accumulate_grad_batches", config_defaults["accumulate_grad_batches"]))
+    accumulate_grad_batches = int(
+        config.get(
+            "accumulate_grad_batches", config_defaults["accumulate_grad_batches"]
+        )
+    )
     early_stopping = config.get("early_stopping", config_defaults["early_stopping"])
-    early_stopping_patience = int(config.get("early_stopping_patience", config_defaults["early_stopping_patience"]))
-    checkpoint_monitor = config.get("checkpoint_monitor", config_defaults["checkpoint_monitor"])
-    checkpoint_save_top_k = int(config.get("checkpoint_save_top_k", config_defaults["checkpoint_save_top_k"]))
-    val_check_interval = float(config.get("val_check_interval", config_defaults["val_check_interval"]))
-    limit_train_batches = float(config.get("limit_train_batches", config_defaults["limit_train_batches"]))
-    enable_model_summary = config.get("enable_model_summary", config_defaults["enable_model_summary"])
+    early_stopping_patience = int(
+        config.get(
+            "early_stopping_patience", config_defaults["early_stopping_patience"]
+        )
+    )
+    checkpoint_monitor = config.get(
+        "checkpoint_monitor", config_defaults["checkpoint_monitor"]
+    )
+    checkpoint_save_top_k = int(
+        config.get("checkpoint_save_top_k", config_defaults["checkpoint_save_top_k"])
+    )
+    val_check_interval = float(
+        config.get("val_check_interval", config_defaults["val_check_interval"])
+    )
+    limit_train_batches = float(
+        config.get("limit_train_batches", config_defaults["limit_train_batches"])
+    )
+    enable_model_summary = config.get(
+        "enable_model_summary", config_defaults["enable_model_summary"]
+    )
     scheduler = config.get("scheduler", config_defaults["scheduler"])
     warmup_epochs = int(config.get("warmup_epochs", config_defaults["warmup_epochs"]))
 

@@ -61,7 +61,6 @@ class BaseLayer(nn.Module, ABC):
     @abstractmethod
     def forward(self, *args, **kwargs):
         """Forward pass through the layer."""
-        pass
 
     def reset_parameters(self):
         """Reset all learnable parameters."""
@@ -177,7 +176,6 @@ class BaseGraphLayer(BaseLayer):
         **kwargs,
     ) -> Tensor:
         """Forward pass through the layer."""
-        pass
 
     def cache_edge_index(
         self, edge_index: Union[Tensor, EdgeIndex]
@@ -199,7 +197,6 @@ class BasePoolingLayer(BaseLayer):
         **kwargs,
     ) -> Tensor:
         """Pool node features to graph-level representation."""
-        pass
 
 
 class BaseAttentionLayer(BaseLayer):
@@ -218,7 +215,6 @@ class BaseAttentionLayer(BaseLayer):
         mask: Optional[Tensor] = None,
     ) -> tuple[Tensor, Tensor]:
         """Compute attention weights and optionally apply to values."""
-        pass
 
 
 class TensorDictLayer(BaseLayer):
@@ -238,7 +234,6 @@ class TensorDictLayer(BaseLayer):
     @abstractmethod
     def process_tensordict(self, td: TensorDict) -> Dict[str, Tensor]:
         """Process input tensordict and return output dict."""
-        pass
 
     def forward(self, td: TensorDict) -> TensorDict:
         """Forward pass with TensorDict."""

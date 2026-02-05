@@ -5,8 +5,9 @@ This module provides generic mixins that can be used across different
 domains without astronomical or specific library assumptions.
 """
 
-import torch
 from typing import List, Optional, Tuple
+
+import torch
 
 
 class NormalizationMixin:
@@ -164,21 +165,27 @@ class FeatureExtractionMixin:
         features = []
 
         if include_moments:
-            features.extend([
-                torch.mean(data, dim=-1),
-                torch.std(data, dim=-1),
-                self._skewness(data),
-                self._kurtosis(data),
-            ])
+            features.extend(
+                [
+                    torch.mean(data, dim=-1),
+                    torch.std(data, dim=-1),
+                    self._skewness(data),
+                    self._kurtosis(data),
+                ]
+            )
 
         if include_quantiles:
-            features.extend([
-                torch.quantile(data, 0.25, dim=-1),
-                torch.quantile(data, 0.5, dim=-1),
-                torch.quantile(data, 0.75, dim=-1),
-            ])
+            features.extend(
+                [
+                    torch.quantile(data, 0.25, dim=-1),
+                    torch.quantile(data, 0.5, dim=-1),
+                    torch.quantile(data, 0.75, dim=-1),
+                ]
+            )
 
-        return torch.stack(features, dim=-1) if features else torch.zeros(data.shape[0], 0)
+        return (
+            torch.stack(features, dim=-1) if features else torch.zeros(data.shape[0], 0)
+        )
 
     def _skewness(self, data: torch.Tensor, dim: int = -1) -> torch.Tensor:
         """Calculate skewness along given dimension."""

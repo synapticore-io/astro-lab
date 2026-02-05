@@ -91,7 +91,8 @@ class AlbpyPlanetShaderGroup(bpy.types.ShaderNodeGroup):
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyPlanetShaderGroup)
 
-
     bpy.utils.register_class(AlbpyPlanetShaderGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyPlanetShaderGroup)

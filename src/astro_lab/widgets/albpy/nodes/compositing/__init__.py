@@ -11,13 +11,8 @@ from typing import Any, Dict
 import bpy
 
 # Import individual compositing modules
-from . import (
+from . import (  # Additional modules can be imported here; lens_flare,; color_grading,; star_glow,; multi_panel,
     glare,
-    # Additional modules can be imported here
-    # lens_flare,
-    # color_grading,
-    # star_glow,
-    # multi_panel,
 )
 
 logger = logging.getLogger(__name__)

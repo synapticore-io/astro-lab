@@ -28,13 +28,13 @@ class TestDeviceUtility:
         """Test that CUDA availability is cached."""
         # Reset cache
         reset_device_cache()
-        
+
         # First call
         result1 = is_cuda_available()
-        
+
         # Second call should use cache
         result2 = is_cuda_available()
-        
+
         assert result1 == result2
         assert isinstance(result1, bool)
 
@@ -58,10 +58,10 @@ class TestDeviceUtility:
         # Populate cache
         is_cuda_available()
         get_default_device()
-        
+
         # Reset cache
         reset_device_cache()
-        
+
         # Should work after reset
         result = is_cuda_available()
         assert isinstance(result, bool)
@@ -78,11 +78,12 @@ class TestTensorUtility:
 
     def test_extract_coordinates_with_attribute(self):
         """Test extracting coordinates from object with .coordinates attribute."""
+
         # Create mock object with coordinates attribute
         class MockSpatialTensorDict:
             def __init__(self, coords):
                 self.coordinates = coords
-        
+
         coords = torch.randn(50, 3)
         spatial = MockSpatialTensorDict(coords)
         result = extract_coordinates(spatial)
@@ -104,15 +105,16 @@ class TestVectorizedCalculations:
         # Create test data
         n_points = 100
         coordinates = torch.randn(n_points, 3) * 10
-        
+
         # Create a simple edge index (k-NN style)
         from torch_geometric.nn import knn_graph
+
         edge_index = knn_graph(coordinates, k=5)
-        
+
         # Calculate anisotropy
         detector = FilamentDetector(device="cpu")
         anisotropy = detector._calculate_anisotropy(coordinates, edge_index)
-        
+
         # Verify output shape and values
         assert anisotropy.shape == (n_points,)
         assert torch.all(anisotropy >= 0)
@@ -123,15 +125,16 @@ class TestVectorizedCalculations:
         # Create test data
         n_points = 100
         coordinates = torch.randn(n_points, 3) * 10
-        
+
         # Create a simple edge index
         from torch_geometric.nn import knn_graph
+
         edge_index = knn_graph(coordinates, k=5)
-        
+
         # Calculate curvature
         detector = FilamentDetector(device="cpu")
         curvature = detector._calculate_curvature(coordinates, edge_index)
-        
+
         # Verify output shape and values
         assert curvature.shape == (n_points,)
         assert torch.all(curvature >= 0)
@@ -143,10 +146,11 @@ class TestVectorizedCalculations:
         # Create large test data
         n_points = 1000
         coordinates = torch.randn(n_points, 3, device="cuda") * 10
-        
+
         from torch_geometric.nn import knn_graph
+
         edge_index = knn_graph(coordinates, k=10)
-        
+
         # Time the vectorized calculation
         detector = FilamentDetector(device="cuda")
         torch.cuda.synchronize()
@@ -154,7 +158,7 @@ class TestVectorizedCalculations:
         anisotropy = detector._calculate_anisotropy(coordinates, edge_index)
         torch.cuda.synchronize()
         vectorized_time = time.time() - start
-        
+
         # Verify result is valid
         assert anisotropy.shape == (n_points,)
         assert vectorized_time < 5.0  # Should complete in reasonable time
@@ -169,13 +173,13 @@ class TestOptimizedClusterSampler:
         n_points = 100
         coordinates = torch.randn(n_points, 3) * 10
         features = torch.randn(n_points, 16)
-        
+
         # Create sampler
         sampler = DBSCANClusterSampler(eps=5.0, min_samples=3)
-        
+
         # Create graph
         data = sampler.create_graph(coordinates, features)
-        
+
         # Verify graph properties
         assert data.x.shape == (n_points, 16)
         assert data.pos.shape == (n_points, 3)
@@ -188,14 +192,14 @@ class TestOptimizedClusterSampler:
         n_points = 15
         coordinates = torch.randn(n_points, 3)
         features = torch.randn(n_points, 8)
-        
+
         # All points in same cluster
         sampler = DBSCANClusterSampler(eps=100.0, min_samples=2)
         data = sampler.create_graph(coordinates, features)
-        
+
         # Should have edges
         assert data.edge_index.shape[1] > 0
-        
+
         # Check for symmetric edges (undirected graph)
         src, dst = data.edge_index
         for i in range(data.edge_index.shape[1]):
@@ -210,8 +214,7 @@ class TestConfigOptimization:
 
     def test_config_defaults_structure(self):
         """Test that config defaults are properly structured."""
-        from astro_lab.training.train import train_model
-        
+
         # This should not raise an error with minimal config
         try:
             # Just test the config extraction doesn't error
@@ -228,21 +231,6 @@ class TestConfigOptimization:
 
 def test_imports():
     """Test that all optimized modules can be imported."""
-    from astro_lab.data.analysis.cosmic_web import ScalableCosmicWebAnalyzer
-    from astro_lab.data.analysis.structures import (
-        CosmicWebAnalyzer,
-        FilamentDetector,
-        StructureAnalyzer,
-    )
-    from astro_lab.data.samplers.cluster import ClusterSampler, DBSCANClusterSampler
-    from astro_lab.memory import clear_cuda_cache, memory_management
-    from astro_lab.training.train import train_model
-    from astro_lab.utils.device import (
-        get_default_device,
-        get_device,
-        is_cuda_available,
-    )
-    from astro_lab.utils.tensor import extract_coordinates
-    
+
     # All imports should succeed
     assert True

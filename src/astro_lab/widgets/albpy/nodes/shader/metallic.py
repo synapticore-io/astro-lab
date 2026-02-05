@@ -59,7 +59,8 @@ class AlbpyMetallicShaderGroup(bpy.types.ShaderNodeGroup):
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyMetallicShaderGroup)
 
-
     bpy.utils.register_class(AlbpyMetallicShaderGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyMetallicShaderGroup)

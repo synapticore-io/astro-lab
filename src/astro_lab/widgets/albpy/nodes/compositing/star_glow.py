@@ -127,7 +127,8 @@ def apply_star_glow_preset(
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyStarGlowCompositingGroup)
 
-
     bpy.utils.register_class(AlbpyStarGlowCompositingGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyStarGlowCompositingGroup)

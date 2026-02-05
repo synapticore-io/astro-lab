@@ -5,14 +5,16 @@ Plotly Visualizer
 Interactive web-based visualization using Plotly.
 """
 
-import numpy as np
-from typing import Dict, Any
+from typing import Any, Dict
+
 import marimo as mo
+import numpy as np
 
 from astro_lab.widgets.plotly import (
-    create_3d_scatter_plot,
     create_3d_analysis_plot,
+    create_3d_scatter_plot,
 )
+
 from .base import BaseVisualizer
 
 
@@ -20,10 +22,7 @@ class PlotlyVisualizer(BaseVisualizer):
     """Plotly-based visualizer for interactive web plots."""
 
     def create_visualization(
-        self,
-        coords: np.ndarray,
-        metadata: Dict[str, Any],
-        params: Dict[str, Any]
+        self, coords: np.ndarray, metadata: Dict[str, Any], params: Dict[str, Any]
     ) -> mo.Html:
         """Create Plotly visualization."""
         # Prepare color data

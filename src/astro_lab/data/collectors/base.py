@@ -57,12 +57,10 @@ class BaseSurveyCollector(ABC):
     @abstractmethod
     def get_download_urls(self) -> List[str]:
         """Get list of URLs to download for this survey."""
-        pass
 
     @abstractmethod
     def get_target_files(self) -> List[str]:
         """Get list of target file names after download."""
-        pass
 
     def download(self, force: bool = False) -> List[Path]:
         """

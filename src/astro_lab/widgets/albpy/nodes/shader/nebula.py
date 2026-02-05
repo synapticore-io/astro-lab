@@ -97,7 +97,8 @@ class AlbpyNebulaShaderGroup(bpy.types.ShaderNodeGroup):
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyNebulaShaderGroup)
 
-
     bpy.utils.register_class(AlbpyNebulaShaderGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyNebulaShaderGroup)

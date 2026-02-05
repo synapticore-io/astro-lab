@@ -173,33 +173,38 @@ class FilamentDetector:
 
         # Vectorized approach: process all edges at once
         src, dst = edge_index[0], edge_index[1]
-        
+
         # Calculate direction vectors for all edges
         directions = coordinates[dst] - coordinates[src]
         directions = F.normalize(directions, dim=1, eps=1e-8)
-        
+
         # Group by source node using scatter operations
         # Count neighbors per node
         neighbor_counts = torch.zeros(n_points, device=device, dtype=torch.long)
         neighbor_counts.scatter_add_(0, src, torch.ones_like(src))
-        
+
         # Calculate mean direction per node
         mean_directions = torch.zeros(n_points, 3, device=device)
-        mean_directions.scatter_add_(0, src.unsqueeze(1).expand_as(directions), directions)
+        mean_directions.scatter_add_(
+            0, src.unsqueeze(1).expand_as(directions), directions
+        )
         valid_mask = neighbor_counts > 0
         mean_directions[valid_mask] /= neighbor_counts[valid_mask].unsqueeze(1).float()
-        
+
         # Calculate variance for each edge
         mean_expanded = mean_directions[src]
         variances = ((directions - mean_expanded) ** 2).sum(dim=1)
-        
+
         # Aggregate variance per node
         variance_sum = torch.zeros(n_points, device=device)
         variance_sum.scatter_add_(0, src, variances)
-        
+
         # Average variance (anisotropy) for nodes with multiple neighbors
         multi_neighbor_mask = neighbor_counts > 1
-        anisotropy[multi_neighbor_mask] = variance_sum[multi_neighbor_mask] / neighbor_counts[multi_neighbor_mask].float()
+        anisotropy[multi_neighbor_mask] = (
+            variance_sum[multi_neighbor_mask]
+            / neighbor_counts[multi_neighbor_mask].float()
+        )
 
         return anisotropy
 
@@ -214,33 +219,40 @@ class FilamentDetector:
 
         # Vectorized approach
         src, dst = edge_index[0], edge_index[1]
-        
+
         # Calculate distances for all edges
         distances = torch.norm(coordinates[dst] - coordinates[src], dim=1)
-        
+
         # Count neighbors per node
         neighbor_counts = torch.zeros(n_points, device=device, dtype=torch.long)
         neighbor_counts.scatter_add_(0, src, torch.ones_like(src))
-        
+
         # Calculate mean distance per node
         distance_sum = torch.zeros(n_points, device=device)
         distance_sum.scatter_add_(0, src, distances)
         mean_distance = torch.zeros(n_points, device=device)
         valid_mask = neighbor_counts > 0
-        mean_distance[valid_mask] = distance_sum[valid_mask] / neighbor_counts[valid_mask].float()
-        
+        mean_distance[valid_mask] = (
+            distance_sum[valid_mask] / neighbor_counts[valid_mask].float()
+        )
+
         # Calculate squared deviations
         mean_expanded = mean_distance[src]
         sq_deviations = (distances - mean_expanded) ** 2
-        
+
         # Sum squared deviations per node
         sq_dev_sum = torch.zeros(n_points, device=device)
         sq_dev_sum.scatter_add_(0, src, sq_deviations)
-        
+
         # Calculate standard deviation and curvature for nodes with 2+ neighbors
         multi_neighbor_mask = neighbor_counts >= 2
-        std_distance = torch.sqrt(sq_dev_sum[multi_neighbor_mask] / neighbor_counts[multi_neighbor_mask].float())
-        curvature[multi_neighbor_mask] = std_distance / (mean_distance[multi_neighbor_mask] + 1e-8)
+        std_distance = torch.sqrt(
+            sq_dev_sum[multi_neighbor_mask]
+            / neighbor_counts[multi_neighbor_mask].float()
+        )
+        curvature[multi_neighbor_mask] = std_distance / (
+            mean_distance[multi_neighbor_mask] + 1e-8
+        )
 
         return curvature
 
@@ -696,7 +708,7 @@ class StructureAnalyzer:
         self, coordinates: torch.Tensor, edge_index: torch.Tensor
     ) -> torch.Tensor:
         """Calculate local planarity using neighbor distribution (vectorized).
-        
+
         Note: This function still uses a loop for eigenvalue calculations
         but is optimized where possible. Full vectorization of eigenvalue
         computation across all nodes would be complex and may not provide
@@ -711,10 +723,10 @@ class StructureAnalyzer:
         src = edge_index[0]
         neighbor_counts = torch.zeros(n_points, device=device, dtype=torch.long)
         neighbor_counts.scatter_add_(0, src, torch.ones_like(src))
-        
+
         # Only process nodes with 3+ neighbors
         valid_nodes = torch.where(neighbor_counts > 2)[0]
-        
+
         for i in valid_nodes:
             # Find neighbors
             neighbor_mask = edge_index[0] == i
@@ -726,9 +738,9 @@ class StructureAnalyzer:
             relative_positions = neighbor_positions - center
 
             # Compute covariance matrix
-            cov_matrix = torch.matmul(
-                relative_positions.T, relative_positions
-            ) / len(relative_positions)
+            cov_matrix = torch.matmul(relative_positions.T, relative_positions) / len(
+                relative_positions
+            )
 
             # Calculate eigenvalues
             eigenvals = torch.linalg.eigvals(cov_matrix).real

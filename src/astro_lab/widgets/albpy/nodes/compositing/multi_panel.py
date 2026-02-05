@@ -200,7 +200,8 @@ def create_multi_panel_layout(
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyMultiPanelCompositingGroup)
 
-
     bpy.utils.register_class(AlbpyMultiPanelCompositingGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyMultiPanelCompositingGroup)

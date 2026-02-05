@@ -126,7 +126,8 @@ class ALBPY_OT_CreateComparisonPlot(Operator):
 def register():
     # REMOVED: bpy.utils.register_class(ALBPY_OT_CreateComparisonPlot)
 
-
     bpy.utils.register_class(ALBPY_OT_CreateComparisonPlot)
+
+
 def unregister():
     bpy.utils.unregister_class(ALBPY_OT_CreateComparisonPlot)

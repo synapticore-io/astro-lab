@@ -8,10 +8,8 @@ Training interface for AstroLab models.
 from pathlib import Path
 
 import marimo as mo
-import polars as pl
 
 from astro_lab.config import get_data_paths
-from astro_lab.data.dataset import AstroLabInMemoryDataset
 from astro_lab.models import AstroModel
 from astro_lab.training import AstroTrainer
 from astro_lab.ui.components import state

@@ -47,7 +47,7 @@ class FlexibleGraphConv(BaseGraphLayer):
         edge_dim: Optional[int] = None,
         aggr: Union[str, Aggregation] = "mean",
         dropout: float = 0.0,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
 
@@ -128,7 +128,7 @@ class FlexibleGraphConv(BaseGraphLayer):
         edge_index: Union[Tensor, EdgeIndex],
         edge_attr: Optional[Tensor] = None,
         return_attention_weights: bool = False,
-        **kwargs
+        **kwargs,
     ) -> Union[Tensor, tuple[Tensor, Tensor]]:
         """Forward pass through the convolution."""
 
@@ -172,7 +172,7 @@ class AstronomicalGraphConv(MessagePassing):
         use_edge_attr: bool = True,
         use_distance_encoding: bool = True,
         aggr: str = "mean",
-        **kwargs
+        **kwargs,
     ):
         super().__init__(aggr=aggr, **kwargs)
 
@@ -263,7 +263,7 @@ class AstronomicalGraphConv(MessagePassing):
         """Reset all parameters."""
         for module in [self.message_net, self.update_net]:
             for layer in module:
-                if hasattr(layer, 'reset_parameters'):
+                if hasattr(layer, "reset_parameters"):
                     layer.reset_parameters()
 
 
@@ -276,9 +276,7 @@ class DistanceEncoder(nn.Module):
         self.max_distance = max_distance
 
         # Learnable frequency parameters
-        self.frequencies = nn.Parameter(
-            torch.randn(encoding_dim // 2) * 0.1
-        )
+        self.frequencies = nn.Parameter(torch.randn(encoding_dim // 2) * 0.1)
 
     def forward(self, distances: Tensor) -> Tensor:
         """Encode distances using sinusoidal encoding."""
@@ -288,12 +286,11 @@ class DistanceEncoder(nn.Module):
 
         # Apply sinusoidal encoding
         encoding = torch.zeros(
-            distances.size(0), self.encoding_dim,
-            device=distances.device
+            distances.size(0), self.encoding_dim, device=distances.device
         )
 
         for i in range(self.encoding_dim // 2):
-            encoding[:, 2*i] = torch.sin(norm_distances * self.frequencies[i])
-            encoding[:, 2*i + 1] = torch.cos(norm_distances * self.frequencies[i])
+            encoding[:, 2 * i] = torch.sin(norm_distances * self.frequencies[i])
+            encoding[:, 2 * i + 1] = torch.cos(norm_distances * self.frequencies[i])
 
         return encoding

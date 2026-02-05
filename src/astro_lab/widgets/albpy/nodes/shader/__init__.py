@@ -11,13 +11,12 @@ from typing import Any, Dict
 import bpy
 
 # Import individual shader modules
-from . import (
+from . import (  # Additional modules can be imported here as they are refactored
     absorption,
     doppler,
     emission,
     galaxy,
     glass,
-    # Additional modules can be imported here as they are refactored
     redshift,
     star,
 )

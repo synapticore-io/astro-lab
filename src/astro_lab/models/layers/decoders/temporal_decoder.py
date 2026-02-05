@@ -5,7 +5,6 @@ Temporal Decoder Layers for AstroLab Models
 Temporal decoder layers for autoencoders.
 """
 
-
 import torch.nn as nn
 from torch import Tensor
 

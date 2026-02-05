@@ -6,6 +6,7 @@ Configuration management page.
 """
 
 import marimo as mo
+
 from astro_lab.ui.components import system_info
 
 
@@ -40,23 +41,24 @@ def create_page(app_state=None):
             "epochs": 100,
         }
 
-        status = mo.callout(
-            "✅ Configuration applied successfully!",
-            kind="success"
-        )
+        status = mo.callout("✅ Configuration applied successfully!", kind="success")
 
     # Layout
-    return mo.vstack([
-        mo.md("## ⚙️ Configuration"),
-        mo.tabs({
-            "System": sys_status,
-            "Data": data_config,
-            "Analysis": analysis_config,
-            "Training": training_config,
-        }),
-        apply_btn,
-        status
-    ])
+    return mo.vstack(
+        [
+            mo.md("## ⚙️ Configuration"),
+            mo.tabs(
+                {
+                    "System": sys_status,
+                    "Data": data_config,
+                    "Analysis": analysis_config,
+                    "Training": training_config,
+                }
+            ),
+            apply_btn,
+            status,
+        ]
+    )
 
 
 def create_data_config(app_state):
@@ -64,19 +66,14 @@ def create_data_config(app_state):
     survey = mo.ui.dropdown(
         options=["gaia", "sdss", "nsa", "exoplanet"],
         value="gaia",
-        label="Default Survey"
+        label="Default Survey",
     )
 
     max_samples = mo.ui.number(
-        100, 1000000, 10000, step=100,
-        label="Default Sample Size"
+        100, 1000000, 10000, step=100, label="Default Sample Size"
     )
 
-    return mo.vstack([
-        mo.md("### 📊 Data Configuration"),
-        survey,
-        max_samples
-    ])
+    return mo.vstack([mo.md("### 📊 Data Configuration"), survey, max_samples])
 
 
 def create_analysis_config(app_state):
@@ -84,19 +81,12 @@ def create_analysis_config(app_state):
     method = mo.ui.dropdown(
         options=["cosmic_web", "clustering", "filaments"],
         value="cosmic_web",
-        label="Analysis Method"
+        label="Analysis Method",
     )
 
-    min_samples = mo.ui.slider(
-        3, 20, 5,
-        label="Min Cluster Size"
-    )
+    min_samples = mo.ui.slider(3, 20, 5, label="Min Cluster Size")
 
-    return mo.vstack([
-        mo.md("### 🔬 Analysis Configuration"),
-        method,
-        min_samples
-    ])
+    return mo.vstack([mo.md("### 🔬 Analysis Configuration"), method, min_samples])
 
 
 def create_training_config(app_state):
@@ -104,23 +94,13 @@ def create_training_config(app_state):
     model = mo.ui.dropdown(
         options=["AstroGraphGNN", "AstroNodeGNN", "AstroPointNet"],
         value="AstroGraphGNN",
-        label="Model Architecture"
+        label="Model Architecture",
     )
 
-    epochs = mo.ui.slider(
-        10, 500, 100, step=10,
-        label="Training Epochs"
-    )
+    epochs = mo.ui.slider(10, 500, 100, step=10, label="Training Epochs")
 
-    batch_size = mo.ui.dropdown(
-        options=[16, 32, 64, 128],
-        value=32,
-        label="Batch Size"
-    )
+    batch_size = mo.ui.dropdown(options=[16, 32, 64, 128], value=32, label="Batch Size")
 
-    return mo.vstack([
-        mo.md("### 🤖 Training Configuration"),
-        model,
-        epochs,
-        batch_size
-    ])
+    return mo.vstack(
+        [mo.md("### 🤖 Training Configuration"), model, epochs, batch_size]
+    )

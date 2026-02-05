@@ -8,7 +8,7 @@ processed_dir = Path("data/processed/gaia")
 if processed_dir.exists():
     print(f"Removing old processed data from {processed_dir}")
     shutil.rmtree(processed_dir)
-    
+
 # Create fresh directory
 processed_dir.mkdir(parents=True, exist_ok=True)
 print(f"Created fresh directory: {processed_dir}")
@@ -21,7 +21,7 @@ dataset = AstroLabInMemoryDataset(
     survey_name="gaia",
     sampling_strategy="knn",
     sampler_kwargs={"k": 8},
-    force_reload=True  # Force reprocessing
+    force_reload=True,  # Force reprocessing
 )
 
 # Trigger processing
@@ -45,7 +45,7 @@ if len(dataset) > 0:
     print(f"  y shape: {sample.y.shape}")
     print(f"  edge_index shape: {sample.edge_index.shape}")
     print(f"  Has train_mask: {hasattr(sample, 'train_mask')}")
-    if hasattr(sample, 'train_mask'):
+    if hasattr(sample, "train_mask"):
         print(f"  Train mask sum: {sample.train_mask.sum()}")
         print(f"  Val mask sum: {sample.val_mask.sum()}")
         print(f"  Test mask sum: {sample.test_mask.sum()}")

@@ -4,7 +4,7 @@ This module provides convenience functions for converting data
 to different visualization backend formats.
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Union
 
 import numpy as np
 

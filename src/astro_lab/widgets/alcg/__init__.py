@@ -20,10 +20,8 @@ from .bridge import (
 )
 
 # Convenience functions
-from .convenience import (
-    # TensorDict-based functions
+from .convenience import (  # TensorDict-based functions; Non-TensorDict functions
     create_cosmic_web_cosmograph,
-    # Non-TensorDict functions
     create_cosmograph_from_coordinates,
     create_cosmograph_from_dataframe,
     create_cosmograph_from_tensordict,

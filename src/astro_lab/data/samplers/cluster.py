@@ -201,21 +201,24 @@ class DBSCANClusterSampler(AstroLabSampler, ClusterSamplerMixin, SpatialSamplerM
                 src_idx = src_idx.unsqueeze(1).expand(n_cluster, n_cluster)
                 dst_idx = torch.arange(n_cluster, device=cluster_nodes.device)
                 dst_idx = dst_idx.unsqueeze(0).expand(n_cluster, n_cluster)
-                
+
                 # Remove self-loops and get upper triangle indices
                 mask = src_idx < dst_idx
                 src_local = src_idx[mask]
                 dst_local = dst_idx[mask]
-                
+
                 # Map to global node indices
                 src_global = cluster_nodes[src_local]
                 dst_global = cluster_nodes[dst_local]
-                
+
                 # Add bidirectional edges
-                edges = torch.stack([
-                    torch.cat([src_global, dst_global]),
-                    torch.cat([dst_global, src_global])
-                ], dim=0)
+                edges = torch.stack(
+                    [
+                        torch.cat([src_global, dst_global]),
+                        torch.cat([dst_global, src_global]),
+                    ],
+                    dim=0,
+                )
                 edge_list.append(edges)
             else:
                 # For larger clusters, use k-NN within cluster

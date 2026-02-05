@@ -156,7 +156,8 @@ def apply_artistic_filter_preset(
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyArtisticFiltersCompositingGroup)
 
-
     bpy.utils.register_class(AlbpyArtisticFiltersCompositingGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyArtisticFiltersCompositingGroup)

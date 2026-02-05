@@ -9,7 +9,6 @@ from torch_geometric.data import Data
 from astro_lab.models import AstroModel
 from src.astro_lab.data.dataset.astrolab import AstroLabInMemoryDataset
 from src.astro_lab.data.dataset.lightning import AstroLabDataModule
-from src.astro_lab.data.samplers.neighbor import KNNSampler
 
 
 class TestModelCreation:
@@ -56,7 +55,7 @@ class TestModelFunctionality:
         pytest.skip("No graph with edges found in first 10 indices.")
 
     def test_node_classification_forward(self):
-        from src.astro_lab.data.samplers import KNNSampler
+        pass
 
         ds = AstroLabInMemoryDataset(survey_name="gaia", task="node_classification")
         dm = AstroLabDataModule(dataset=ds, batch_size=1, num_workers=0)
@@ -75,7 +74,7 @@ class TestModelFunctionality:
         assert out.shape[0] == graph.x.shape[0]
 
     def test_graph_classification_forward(self):
-        from src.astro_lab.data.samplers import KNNSampler
+        pass
 
         ds = AstroLabInMemoryDataset(survey_name="gaia", task="graph_classification")
         dm = AstroLabDataModule(dataset=ds, batch_size=1, num_workers=0)
@@ -94,7 +93,7 @@ class TestModelFunctionality:
         assert out.shape[1] == 3
 
     def test_node_regression_forward(self):
-        from src.astro_lab.data.samplers import KNNSampler
+        pass
 
         ds = AstroLabInMemoryDataset(survey_name="gaia", task="node_regression")
         dm = AstroLabDataModule(dataset=ds, batch_size=1, num_workers=0)

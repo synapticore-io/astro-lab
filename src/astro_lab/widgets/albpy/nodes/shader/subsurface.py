@@ -27,7 +27,8 @@ class AlbpySubsurfaceShaderGroup(bpy.types.ShaderNodeGroup):
 def register():
     # REMOVED: bpy.utils.register_class(AlbpySubsurfaceShaderGroup)
 
-
     bpy.utils.register_class(AlbpySubsurfaceShaderGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpySubsurfaceShaderGroup)

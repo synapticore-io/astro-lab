@@ -283,10 +283,8 @@ class CompositingPresets:
 def register():
     """Register compositing presets."""
     # Presets are just configuration data, no actual registration needed
-    pass
 
 
 def unregister():
     """Unregister compositing presets."""
     # Presets are just configuration data, no actual unregistration needed
-    pass

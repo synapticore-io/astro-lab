@@ -69,7 +69,9 @@ class AstronomicalTensorBridge:
         # Handle unit conversion if requested
         if kwargs.get("convert_units", False) and hasattr(tensordict, "coordinates"):
             target_unit = kwargs.pop("target_unit", "pc")
-            tensordict = self.converter.convert_tensordict_units(tensordict, target_unit)
+            tensordict = self.converter.convert_tensordict_units(
+                tensordict, target_unit
+            )
 
         # Auto-select backend if needed
         if backend == "auto":

@@ -14,16 +14,12 @@ from pathlib import Path
 
 import polars as pl
 import pytest
-import torch
-from torch_geometric.data import Data
 
 from astro_lab.config import get_data_config
-from astro_lab.data.collectors.gaia import GaiaCollector
 from astro_lab.data.dataset.astrolab import AstroLabInMemoryDataset
 from astro_lab.data.dataset.lightning import AstroLabDataModule
 from astro_lab.data.info import SurveyInfo
 from astro_lab.data.preprocessors.gaia import GaiaPreprocessor
-from astro_lab.data.samplers.neighbor import KNNSampler
 from astro_lab.models import AstroModel
 
 # Get central data configuration

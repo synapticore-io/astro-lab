@@ -16,73 +16,24 @@ Supported visualization types for create_astronomical_visualization:
 import logging
 from typing import Any, Dict, Optional
 
-# Core functionality
-from .core import (
-    render_astronomical_scene,
-    setup_camera,
-    setup_lighting,
-    setup_rendering,
-    setup_scene,
-)
-
-# Import the main cosmic web scene generator
-from .cosmic_web_generator import generate_cosmic_web_scene
-from .nodes.compositing import (
-    apply_telescope_profile,
-    get_available_compositing_nodes,
-    setup_astronomical_compositor,
-)
-
 # Node group and utility exports (only implemented functions)
-from .nodes.compositing import (
-    register as register_compositing,
-)
-from .nodes.compositing import (
-    unregister as unregister_compositing,
-)
-from .nodes.geometry import (
-    create_geometry_modifier,
-    get_available_geometry_nodes,
-)
-from .nodes.geometry import (
-    register as register_geometry,
-)
-from .nodes.geometry import (
-    unregister as unregister_geometry,
-)
-from .nodes.shader import (
-    create_astronomical_material,
-    get_absorption_presets,
-    get_all_presets,
-    get_available_shader_nodes,
-    get_doppler_presets,
-    get_emission_presets,
-    get_galaxy_presets,
-    get_glass_presets,
-    get_redshift_presets,
-    get_stellar_presets,
-)
-from .nodes.shader import (
-    register as register_shader,
-)
-from .nodes.shader import (
-    unregister as unregister_shader,
-)
+from .nodes.compositing import register as register_compositing
+from .nodes.compositing import unregister as unregister_compositing
+from .nodes.geometry import register as register_geometry
+from .nodes.geometry import unregister as unregister_geometry
+from .nodes.shader import register as register_shader
+from .nodes.shader import unregister as unregister_shader
 
 # Operator registration (modernized)
 from .operators import register as register_operators
 from .operators import unregister as unregister_operators
 
+# Core functionality
+
+# Import the main cosmic web scene generator
+
+
 # Utility functions (consolidated)
-from .utilities.astronomical_data import (
-    GALAXY_TYPES,
-    HR_DIAGRAM_PARAMS,
-    STELLAR_CLASSIFICATION,
-    create_sample_stellar_data,
-    get_galaxy_config,
-    get_stellar_data,
-    validate_hr_diagram_data,
-)
 
 logger = logging.getLogger(__name__)
 

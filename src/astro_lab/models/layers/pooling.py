@@ -389,9 +389,13 @@ class AdaptivePooling(BasePoolingLayer):
             # Ensure all pooled outputs have same dimension
             if pooled.shape[-1] != output_dim:
                 # Project to same dimension if needed
-                if not hasattr(self, f'proj_{method}'):
-                    setattr(self, f'proj_{method}', nn.Linear(pooled.shape[-1], output_dim).to(pooled.device))
-                pooled = getattr(self, f'proj_{method}')(pooled)
+                if not hasattr(self, f"proj_{method}"):
+                    setattr(
+                        self,
+                        f"proj_{method}",
+                        nn.Linear(pooled.shape[-1], output_dim).to(pooled.device),
+                    )
+                pooled = getattr(self, f"proj_{method}")(pooled)
 
             pooled_outputs.append(pooled)
 

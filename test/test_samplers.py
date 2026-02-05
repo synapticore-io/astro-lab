@@ -1,15 +1,8 @@
 """Test all sampler types with the streaming dataset."""
 
 import pytest
-import torch
 
-from astro_lab.data.samplers.AdaptiveRadiusSampler import AdaptiveRadiusSampler
-from astro_lab.data.samplers.NeighborSubgraphSampler import NeighborSubgraphSampler
-from astro_lab.data.samplers.RadiusSampler import RadiusSampler
 from src.astro_lab.data.dataset.astrolab import AstroLabInMemoryDataset
-from src.astro_lab.data.samplers.neighbor import (
-    KNNSampler,
-)
 
 
 @pytest.fixture

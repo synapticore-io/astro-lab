@@ -78,7 +78,8 @@ class AlbpyEnergyFieldShaderGroup(bpy.types.ShaderNodeGroup):
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyEnergyFieldShaderGroup)
 
-
     bpy.utils.register_class(AlbpyEnergyFieldShaderGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyEnergyFieldShaderGroup)

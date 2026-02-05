@@ -56,7 +56,9 @@ class ImageTensorDict(
             coordinates: Central coordinates of images
         """
         if images.dim() != 4:
-            raise ValueError(f"Images must be 4D tensor [N, C, H, W], got {images.shape}")
+            raise ValueError(
+                f"Images must be 4D tensor [N, C, H, W], got {images.shape}"
+            )
 
         N, C, H, W = images.shape
 
@@ -64,14 +66,18 @@ class ImageTensorDict(
         if bands is None:
             bands = [f"band_{i}" for i in range(C)]
         elif len(bands) != C:
-            raise ValueError(f"Number of bands ({len(bands)}) doesn't match channels ({C})")
+            raise ValueError(
+                f"Number of bands ({len(bands)}) doesn't match channels ({C})"
+            )
 
         # Handle WCS
         if wcs is not None:
             if isinstance(wcs, WCS):
                 wcs = [wcs] * N  # Same WCS for all images
             elif len(wcs) != N:
-                raise ValueError(f"Number of WCS ({len(wcs)}) doesn't match images ({N})")
+                raise ValueError(
+                    f"Number of WCS ({len(wcs)}) doesn't match images ({N})"
+                )
 
         # Handle pixel scale
         if pixel_scale is not None:
@@ -146,14 +152,16 @@ class ImageTensorDict(
         """List of WCS objects."""
         return self.get("wcs", None)
 
-    def extract_features(self, feature_types: Optional[List[str]] = None, **kwargs) -> Dict[str, torch.Tensor]:
+    def extract_features(
+        self, feature_types: Optional[List[str]] = None, **kwargs
+    ) -> Dict[str, torch.Tensor]:
         """
         Extract image features from the TensorDict.
-        
+
         Args:
             feature_types: Types of features to extract ('image', 'morphological', 'statistical')
             **kwargs: Additional extraction parameters
-            
+
         Returns:
             Dictionary of extracted image features
         """
@@ -166,8 +174,12 @@ class ImageTensorDict(
             images = self.images
             features["mean_intensity"] = torch.mean(images, dim=(-2, -1))
             features["std_intensity"] = torch.std(images, dim=(-2, -1))
-            features["max_intensity"] = torch.max(images.view(images.shape[0], images.shape[1], -1), dim=-1)[0]
-            features["min_intensity"] = torch.min(images.view(images.shape[0], images.shape[1], -1), dim=-1)[0]
+            features["max_intensity"] = torch.max(
+                images.view(images.shape[0], images.shape[1], -1), dim=-1
+            )[0]
+            features["min_intensity"] = torch.min(
+                images.view(images.shape[0], images.shape[1], -1), dim=-1
+            )[0]
 
         if feature_types is None or "morphological" in feature_types:
             # Morphological features
@@ -177,8 +189,12 @@ class ImageTensorDict(
             grad_x = torch.diff(images, dim=-1)
             grad_y = torch.diff(images, dim=-2)
 
-            features["gradient_strength_x"] = torch.mean(torch.abs(grad_x), dim=(-2, -1))
-            features["gradient_strength_y"] = torch.mean(torch.abs(grad_y), dim=(-2, -1))
+            features["gradient_strength_x"] = torch.mean(
+                torch.abs(grad_x), dim=(-2, -1)
+            )
+            features["gradient_strength_y"] = torch.mean(
+                torch.abs(grad_y), dim=(-2, -1)
+            )
 
         if feature_types is None or "statistical" in feature_types:
             # Statistical features
@@ -188,7 +204,9 @@ class ImageTensorDict(
             flat_images = images.view(images.shape[0], images.shape[1], -1)
 
             features["median_intensity"] = torch.median(flat_images, dim=-1)[0]
-            features["intensity_range"] = features["max_intensity"] - features["min_intensity"]
+            features["intensity_range"] = (
+                features["max_intensity"] - features["min_intensity"]
+            )
 
         return features
 
@@ -273,7 +291,9 @@ class ImageTensorDict(
 
         return backgrounds
 
-    def subtract_background(self, method: str = "sigma_clip", **kwargs) -> "ImageTensorDict":
+    def subtract_background(
+        self, method: str = "sigma_clip", **kwargs
+    ) -> "ImageTensorDict":
         """
         Subtract background from images.
 
@@ -407,24 +427,28 @@ class ImageTensorDict(
                 image = self.images[n, c]
 
                 # Basic statistics
-                img_features.extend([
-                    torch.mean(image),
-                    torch.std(image),
-                    torch.median(image),
-                    torch.min(image),
-                    torch.max(image),
-                ])
+                img_features.extend(
+                    [
+                        torch.mean(image),
+                        torch.std(image),
+                        torch.median(image),
+                        torch.min(image),
+                        torch.max(image),
+                    ]
+                )
 
                 # Image structure
                 gradient_x = torch.diff(image, dim=1)
                 gradient_y = torch.diff(image, dim=0)
 
-                img_features.extend([
-                    torch.mean(torch.abs(gradient_x)),  # Edge strength X
-                    torch.mean(torch.abs(gradient_y)),  # Edge strength Y
-                    torch.std(gradient_x),  # Texture X
-                    torch.std(gradient_y),  # Texture Y
-                ])
+                img_features.extend(
+                    [
+                        torch.mean(torch.abs(gradient_x)),  # Edge strength X
+                        torch.mean(torch.abs(gradient_y)),  # Edge strength Y
+                        torch.std(gradient_x),  # Texture X
+                        torch.std(gradient_y),  # Texture Y
+                    ]
+                )
 
             features.append(torch.stack(img_features))
 

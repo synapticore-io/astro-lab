@@ -32,7 +32,8 @@ class ALBPY_OT_CreatePlanet(Operator):
 def register():
     # REMOVED: bpy.utils.register_class(ALBPY_OT_CreatePlanet)
 
-
     bpy.utils.register_class(ALBPY_OT_CreatePlanet)
+
+
 def unregister():
     bpy.utils.unregister_class(ALBPY_OT_CreatePlanet)

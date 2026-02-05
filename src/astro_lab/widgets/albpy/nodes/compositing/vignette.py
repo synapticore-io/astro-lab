@@ -108,7 +108,8 @@ def apply_vignette_preset(
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyVignetteCompositingGroup)
 
-
     bpy.utils.register_class(AlbpyVignetteCompositingGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyVignetteCompositingGroup)

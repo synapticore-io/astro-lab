@@ -7,8 +7,9 @@ Abstract base class for all visualization backends.
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Tuple
-import numpy as np
+
 import marimo as mo
+import numpy as np
 
 
 class BaseVisualizer(ABC):
@@ -48,24 +49,22 @@ class BaseVisualizer(ABC):
 
     @abstractmethod
     def create_visualization(
-        self,
-        coords: np.ndarray,
-        metadata: Dict[str, Any],
-        params: Dict[str, Any]
+        self, coords: np.ndarray, metadata: Dict[str, Any], params: Dict[str, Any]
     ) -> mo.Html:
         """Create visualization from coordinates and metadata.
-        
+
         Args:
             coords: 3D coordinates array
             metadata: Additional data (magnitudes, clusters, etc.)
             params: Visualization parameters
-            
+
         Returns:
             Marimo HTML element
         """
-        pass
 
-    def extract_coordinates(self, data: Any) -> Tuple[Optional[np.ndarray], Dict[str, Any]]:
+    def extract_coordinates(
+        self, data: Any
+    ) -> Tuple[Optional[np.ndarray], Dict[str, Any]]:
         """Extract coordinates and metadata from various data formats."""
         metadata = {}
 
@@ -140,7 +139,9 @@ class BaseVisualizer(ABC):
             # Copy other fields to metadata
             for key, value in data.items():
                 if key not in ["coordinates", "positions", "x", "y", "z"]:
-                    metadata[key] = np.array(value) if not isinstance(value, np.ndarray) else value
+                    metadata[key] = (
+                        np.array(value) if not isinstance(value, np.ndarray) else value
+                    )
         else:
             return None, metadata
 

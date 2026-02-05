@@ -6,11 +6,7 @@ Uses fixtures from conftest.py for comprehensive testing with actual astronomica
 
 import pytest
 import torch
-from torch_geometric.data import Data
 
-from astro_lab.data.dataset.astrolab import AstroLabInMemoryDataset
-from astro_lab.data.dataset.lightning import AstroLabDataModule
-from astro_lab.data.samplers.neighbor import KNNSampler
 from astro_lab.models import AstroModel
 from astro_lab.training import AstroTrainer
 

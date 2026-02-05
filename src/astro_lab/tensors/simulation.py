@@ -1,4 +1,4 @@
-﻿"""
+"""
 Simulation TensorDict for N-Body simulations and cosmological data.
 
 TensorDict for N-Body simulations and cosmological data with proper

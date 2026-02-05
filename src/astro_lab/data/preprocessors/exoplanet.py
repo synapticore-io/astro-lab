@@ -28,7 +28,7 @@ class ExoplanetPreprocessor(
     StatisticalPreprocessorMixin,
 ):
     """Enhanced preprocessor for exoplanet data with host star coordinate integration.
-    
+
     Uses real Gaia DR3 data to resolve host star coordinates whenever possible.
     """
 
@@ -64,38 +64,44 @@ class ExoplanetPreprocessor(
         """Load processed Gaia data for host star coordinate lookup."""
         if self._gaia_host_data is not None:
             return self._gaia_host_data
-            
+
         # Try to find Gaia data in processed directory
         gaia_files = [
             Path("data/processed/gaia/gaia_processed.parquet"),
             Path("data/raw/gaia/gaia_sample.parquet"),
             Path("data/raw/gaia.parquet"),
         ]
-        
+
         for gaia_path in gaia_files:
             if gaia_path.exists():
                 try:
                     logger.info(f"Loading Gaia host star data from {gaia_path}")
                     gaia_data = pl.read_parquet(gaia_path)
-                    
+
                     # Create host star mapping using star names/identifiers
                     # Gaia data might have star names in various columns
-                    potential_name_cols = ["source_id", "name", "designation", "dr2_source_id"]
-                    
+                    potential_name_cols = [
+                        "source_id",
+                        "name",
+                        "designation",
+                        "dr2_source_id",
+                    ]
+
                     for col in potential_name_cols:
                         if col in gaia_data.columns:
                             # Create a mapping from star names to coordinates
-                            self._gaia_host_data = gaia_data.select([
-                                col,
-                                "ra", "dec", "distance_pc"
-                            ]).rename({col: "host_name"})
-                            logger.info(f"Created Gaia host star mapping with {len(self._gaia_host_data)} stars")
+                            self._gaia_host_data = gaia_data.select(
+                                [col, "ra", "dec", "distance_pc"]
+                            ).rename({col: "host_name"})
+                            logger.info(
+                                f"Created Gaia host star mapping with {len(self._gaia_host_data)} stars"
+                            )
                             return self._gaia_host_data
-                            
+
                 except Exception as e:
                     logger.warning(f"Failed to load Gaia data from {gaia_path}: {e}")
                     continue
-                    
+
         logger.warning("No Gaia host star data available for coordinate lookup")
         return None
 
@@ -109,12 +115,12 @@ class ExoplanetPreprocessor(
         # Try to match host stars using various column combinations
         host_cols = ["hostname", "pl_hostname", "host_name", "star_name"]
         host_col = None
-        
+
         for col in host_cols:
             if col in df.columns:
                 host_col = col
                 break
-                
+
         if host_col is None:
             logger.warning("No host star name column found in exoplanet data")
             return df
@@ -126,45 +132,46 @@ class ExoplanetPreprocessor(
                 left_on=host_col,
                 right_on="host_name",
                 how="left",
-                suffix="_gaia"
+                suffix="_gaia",
             )
-            
+
             # Use Gaia coordinates if available, otherwise keep original
             for coord_col in ["ra", "dec", "distance_pc"]:
                 gaia_col = f"{coord_col}_gaia"
                 if gaia_col in joined.columns:
                     # Create a combined column using Gaia data preferentially
                     if coord_col in joined.columns:
-                        joined = joined.with_columns([
-                            pl.when(pl.col(gaia_col).is_not_null())
-                            .then(pl.col(gaia_col))
-                            .otherwise(pl.col(coord_col))
-                            .alias(coord_col)
-                        ])
+                        joined = joined.with_columns(
+                            [
+                                pl.when(pl.col(gaia_col).is_not_null())
+                                .then(pl.col(gaia_col))
+                                .otherwise(pl.col(coord_col))
+                                .alias(coord_col)
+                            ]
+                        )
                     else:
-                        joined = joined.with_columns([
-                            pl.col(gaia_col).alias(coord_col)
-                        ])
-                    
+                        joined = joined.with_columns(
+                            [pl.col(gaia_col).alias(coord_col)]
+                        )
+
                     # Clean up temporary column
                     joined = joined.drop(gaia_col)
 
             # Count successful matches
             matched_count = joined.filter(
-                pl.col("ra").is_not_null() & 
-                pl.col("dec").is_not_null()
+                pl.col("ra").is_not_null() & pl.col("dec").is_not_null()
             ).height
-            
+
             total_count = len(df)
             match_rate = matched_count / total_count if total_count > 0 else 0
-            
+
             logger.info(
                 f"Matched {matched_count}/{total_count} exoplanets "
                 f"({match_rate:.1%}) to Gaia host stars"
             )
-            
+
             return joined
-            
+
         except Exception as e:
             logger.error(f"Failed to match exoplanets with Gaia host stars: {e}")
             return df
@@ -257,11 +264,13 @@ class ExoplanetPreprocessor(
         if has_coords and "distance_pc" in df.columns:
             logger.info("Converting host star coordinates to Cartesian")
             x, y, z = spherical_to_cartesian(df["ra"], df["dec"], df["distance_pc"])
-            df = df.with_columns([
-                pl.Series("x", x),
-                pl.Series("y", y),
-                pl.Series("z", z),
-            ])
+            df = df.with_columns(
+                [
+                    pl.Series("x", x),
+                    pl.Series("y", y),
+                    pl.Series("z", z),
+                ]
+            )
         else:
             logger.warning(
                 "Insufficient coordinate information found. "
@@ -300,21 +309,23 @@ class ExoplanetPreprocessor(
 
         if mass_col and radius_col:
             # Bulk density (Earth units)
-            df = df.with_columns([
-                (pl.col(mass_col) / (pl.col(radius_col) ** 3)).alias("pl_density")
-            ])
+            df = df.with_columns(
+                [(pl.col(mass_col) / (pl.col(radius_col) ** 3)).alias("pl_density")]
+            )
 
             # Planet type classification based on mass and radius
-            df = df.with_columns([
-                pl.when((pl.col(radius_col) < 1.25) & (pl.col(mass_col) < 2.0))
-                .then(pl.lit("terrestrial"))
-                .when((pl.col(radius_col) < 2.0) & (pl.col(mass_col) < 10.0))
-                .then(pl.lit("super_earth"))
-                .when((pl.col(radius_col) < 4.0) & (pl.col(mass_col) < 50.0))
-                .then(pl.lit("neptune"))
-                .otherwise(pl.lit("gas_giant"))
-                .alias("pl_type")
-            ])
+            df = df.with_columns(
+                [
+                    pl.when((pl.col(radius_col) < 1.25) & (pl.col(mass_col) < 2.0))
+                    .then(pl.lit("terrestrial"))
+                    .when((pl.col(radius_col) < 2.0) & (pl.col(mass_col) < 10.0))
+                    .then(pl.lit("super_earth"))
+                    .when((pl.col(radius_col) < 4.0) & (pl.col(mass_col) < 50.0))
+                    .then(pl.lit("neptune"))
+                    .otherwise(pl.lit("gas_giant"))
+                    .alias("pl_type")
+                ]
+            )
 
         # Orbital properties
         period_cols = ["pl_orbper", "period", "orbital_period"]
@@ -326,13 +337,15 @@ class ExoplanetPreprocessor(
 
         if period_col:
             # Habitability metrics (simplified)
-            df = df.with_columns([
-                # Earth-like period range (200-500 days)
-                pl.when((pl.col(period_col) > 200) & (pl.col(period_col) < 500))
-                .then(pl.lit(True))
-                .otherwise(pl.lit(False))
-                .alias("potentially_habitable_period")
-            ])
+            df = df.with_columns(
+                [
+                    # Earth-like period range (200-500 days)
+                    pl.when((pl.col(period_col) > 200) & (pl.col(period_col) < 500))
+                    .then(pl.lit(True))
+                    .otherwise(pl.lit(False))
+                    .alias("potentially_habitable_period")
+                ]
+            )
 
         return df
 
@@ -348,23 +361,25 @@ class ExoplanetPreprocessor(
 
         if teff_col:
             # Stellar type classification (simplified)
-            df = df.with_columns([
-                pl.when(pl.col(teff_col) > 7500)
-                .then(pl.lit("A"))
-                .when(pl.col(teff_col) > 6000)
-                .then(pl.lit("F"))
-                .when(pl.col(teff_col) > 5200)
-                .then(pl.lit("G"))
-                .when(pl.col(teff_col) > 3700)
-                .then(pl.lit("K"))
-                .otherwise(pl.lit("M"))
-                .alias("st_type"),
-                # Sun-like stars
-                pl.when((pl.col(teff_col) > 5000) & (pl.col(teff_col) < 6000))
-                .then(pl.lit(True))
-                .otherwise(pl.lit(False))
-                .alias("sun_like_host"),
-            ])
+            df = df.with_columns(
+                [
+                    pl.when(pl.col(teff_col) > 7500)
+                    .then(pl.lit("A"))
+                    .when(pl.col(teff_col) > 6000)
+                    .then(pl.lit("F"))
+                    .when(pl.col(teff_col) > 5200)
+                    .then(pl.lit("G"))
+                    .when(pl.col(teff_col) > 3700)
+                    .then(pl.lit("K"))
+                    .otherwise(pl.lit("M"))
+                    .alias("st_type"),
+                    # Sun-like stars
+                    pl.when((pl.col(teff_col) > 5000) & (pl.col(teff_col) < 6000))
+                    .then(pl.lit(True))
+                    .otherwise(pl.lit(False))
+                    .alias("sun_like_host"),
+                ]
+            )
 
         # Host star mass
         mass_cols = ["st_mass", "star_mass", "host_mass"]
@@ -383,21 +398,27 @@ class ExoplanetPreprocessor(
         """Calculate planet positions relative to host star using real orbital data."""
         # Required columns: host x, y, z and planet orbital elements
         if not all(col in df.columns for col in ["x", "y", "z"]):
-            logger.warning("No host star coordinates available for planet position calculation")
-            df = df.with_columns([
-                pl.lit(None).alias("planet_x"),
-                pl.lit(None).alias("planet_y"), 
-                pl.lit(None).alias("planet_z"),
-            ])
+            logger.warning(
+                "No host star coordinates available for planet position calculation"
+            )
+            df = df.with_columns(
+                [
+                    pl.lit(None).alias("planet_x"),
+                    pl.lit(None).alias("planet_y"),
+                    pl.lit(None).alias("planet_z"),
+                ]
+            )
             return df
-            
+
         if "pl_orbsmax" not in df.columns:
             logger.warning("No orbital semi-major axis data available")
-            df = df.with_columns([
-                pl.lit(None).alias("planet_x"),
-                pl.lit(None).alias("planet_y"),
-                pl.lit(None).alias("planet_z"),
-            ])
+            df = df.with_columns(
+                [
+                    pl.lit(None).alias("planet_x"),
+                    pl.lit(None).alias("planet_y"),
+                    pl.lit(None).alias("planet_z"),
+                ]
+            )
             return df
 
         # Constants
@@ -405,7 +426,7 @@ class ExoplanetPreprocessor(
 
         # Prepare orbital data
         x_s = df["x"].to_numpy()
-        y_s = df["y"].to_numpy() 
+        y_s = df["y"].to_numpy()
         z_s = df["z"].to_numpy()
         a = df["pl_orbsmax"].to_numpy() * AU_PC  # convert AU to pc
 
@@ -415,17 +436,19 @@ class ExoplanetPreprocessor(
             if "pl_orbeccen" in df.columns
             else np.zeros_like(a)
         )
-        
+
         # Orbital phase - use real data if available
         if "pl_orbphase" in df.columns:
             phase = df["pl_orbphase"].to_numpy()
         elif "pl_orbtper" in df.columns and "pl_orbper" in df.columns:
             # Calculate phase from time of periastron and period
-            phase = np.mod(df["pl_orbtper"].to_numpy() / df["pl_orbper"].to_numpy(), 1.0)
+            phase = np.mod(
+                df["pl_orbtper"].to_numpy() / df["pl_orbper"].to_numpy(), 1.0
+            )
         else:
             # Random phase for each planet
             phase = np.random.uniform(0, 1, size=len(a))
-        
+
         incl = (
             df["pl_orbincl"].to_numpy()
             if "pl_orbincl" in df.columns
@@ -449,11 +472,13 @@ class ExoplanetPreprocessor(
         planet_y = y_s + y_orb_incl
         planet_z = z_s + z_orb_incl
 
-        df = df.with_columns([
-            pl.Series("planet_x", planet_x),
-            pl.Series("planet_y", planet_y),
-            pl.Series("planet_z", planet_z),
-        ])
+        df = df.with_columns(
+            [
+                pl.Series("planet_x", planet_x),
+                pl.Series("planet_y", planet_y),
+                pl.Series("planet_z", planet_z),
+            ]
+        )
 
         logger.info("Calculated planet Cartesian coordinates relative to host stars")
         return df

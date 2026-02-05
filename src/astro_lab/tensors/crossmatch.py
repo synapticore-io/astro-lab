@@ -1,4 +1,4 @@
-﻿"""
+"""
 Cross-matching TensorDict for astronomical catalogs.
 
 TensorDict for cross-matching between astronomical catalogs with proper
@@ -246,26 +246,26 @@ class CrossMatchTensorDict(AstroTensorDict, ValidationMixin):
         dec1_exp = dec1.unsqueeze(1)  # [N1, 1]
         ra2_exp = ra2.unsqueeze(0)  # [1, N2]
         dec2_exp = dec2.unsqueeze(0)  # [1, N2]
-        
+
         # Compute all pairwise angular separations at once
         # Result shape: [N1, N2]
-        separations = self._angular_separation(
-            ra1_exp, dec1_exp, ra2_exp, dec2_exp
-        )
-        
+        separations = self._angular_separation(ra1_exp, dec1_exp, ra2_exp, dec2_exp)
+
         # Find all matches within radius
         match_radius_deg = match_radius / 3600  # Convert arcsec to degrees
         mask = separations <= match_radius_deg
-        
+
         # Get indices of matches
-        indices = torch.nonzero(mask, as_tuple=False)  # [M, 2] where M is number of matches
-        
+        indices = torch.nonzero(
+            mask, as_tuple=False
+        )  # [M, 2] where M is number of matches
+
         if indices.numel() > 0:
             # Extract matched pairs and their properties
             matches = indices  # Already in [i, j] format
             distances = separations[mask] * 3600  # Convert back to arcsec
             qualities = 1.0 / (1.0 + separations[mask])
-            
+
             self["matches"] = matches
             self["distances"] = distances
             self["match_quality"] = qualities
@@ -288,7 +288,7 @@ class CrossMatchTensorDict(AstroTensorDict, ValidationMixin):
     ) -> torch.Tensor:
         """
         Compute angular separation between celestial coordinates.
-        
+
         Supports both scalar and vectorized operations via broadcasting.
 
         Args:

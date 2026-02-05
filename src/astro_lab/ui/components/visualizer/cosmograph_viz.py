@@ -5,14 +5,16 @@ Cosmograph Visualizer
 GPU-accelerated interactive visualization using Cosmograph.
 """
 
-import numpy as np
-from typing import Dict, Any
+from typing import Any, Dict
+
 import marimo as mo
+import numpy as np
 
 from astro_lab.widgets.alcg import (
-    create_cosmograph_visualization,
     create_cosmic_web_cosmograph,
+    create_cosmograph_visualization,
 )
+
 from .base import BaseVisualizer
 
 
@@ -20,14 +22,13 @@ class CosmographVisualizer(BaseVisualizer):
     """Cosmograph-based visualizer for large-scale astronomical data."""
 
     def create_visualization(
-        self,
-        coords: np.ndarray,
-        metadata: Dict[str, Any],
-        params: Dict[str, Any]
+        self, coords: np.ndarray, metadata: Dict[str, Any], params: Dict[str, Any]
     ) -> mo.Html:
         """Create Cosmograph visualization."""
         # Check if we have cosmic web analysis results
-        if any(key in metadata for key in ["cluster_labels", "filament_edges", "void_mask"]):
+        if any(
+            key in metadata for key in ["cluster_labels", "filament_edges", "void_mask"]
+        ):
             return create_cosmic_web_cosmograph(
                 coords,
                 analysis_results=metadata,

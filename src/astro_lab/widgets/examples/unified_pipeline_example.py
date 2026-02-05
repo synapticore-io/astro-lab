@@ -9,14 +9,14 @@ import torch
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 
+from astro_lab.tensors import SpatialTensorDict
 from astro_lab.widgets import (
-    unified_pipeline,
+    create_publication_figure,
     create_visualization,
     plot_cosmic_web,
     plot_stellar_data,
-    create_publication_figure,
+    unified_pipeline,
 )
-from astro_lab.tensors import SpatialTensorDict
 
 
 def example_cosmic_web_visualization():
@@ -39,9 +39,7 @@ def example_cosmic_web_visualization():
         n_points = n_nodes // n_clusters
 
         # Generate clustered points with astropy units
-        cluster_points = (
-            np.random.randn(n_points, 3) * 10 * u.Mpc + center
-        )
+        cluster_points = np.random.randn(n_points, 3) * 10 * u.Mpc + center
         points.append(cluster_points)
         cluster_labels.extend([i] * n_points)
 
@@ -50,34 +48,39 @@ def example_cosmic_web_visualization():
 
     # Create edges for cosmic web structure
     from sklearn.neighbors import kneighbors_graph
+
     positions_value = positions.to(u.Mpc).value
-    A = kneighbors_graph(positions_value, n_neighbors=6, mode='connectivity')
+    A = kneighbors_graph(positions_value, n_neighbors=6, mode="connectivity")
     edge_index = torch.tensor(np.array(A.nonzero()), dtype=torch.long)
 
     # Create SpatialTensorDict with proper units
-    spatial_data = SpatialTensorDict({
-        'coordinates': torch.tensor(positions_value, dtype=torch.float32),
-        'edge_index': edge_index,
-        'cluster_labels': torch.tensor(cluster_labels, dtype=torch.long),
-    }, coordinate_system='cartesian', unit='Mpc')
+    spatial_data = SpatialTensorDict(
+        {
+            "coordinates": torch.tensor(positions_value, dtype=torch.float32),
+            "edge_index": edge_index,
+            "cluster_labels": torch.tensor(cluster_labels, dtype=torch.long),
+        },
+        coordinate_system="cartesian",
+        unit="Mpc",
+    )
 
     # Visualize with different effects combinations
     print("\n1. Scientific analysis (PyVista)")
     create_visualization(
         spatial_data,
-        backend='pyvista',
-        visualization_type='cosmic_web',
+        backend="pyvista",
+        visualization_type="cosmic_web",
         show_axes=True,
-        background_color='white',
+        background_color="white",
     )
 
     print("\n2. Photorealistic rendering (Blender + effects)")
     plot_cosmic_web(
         spatial_data,
-        effects=['glow', 'volumetric', 'bloom'],
+        effects=["glow", "volumetric", "bloom"],
         photorealistic=True,
         interactive=False,
-        render_path='cosmic_web_render.png',
+        render_path="cosmic_web_render.png",
         resolution=(3840, 2160),  # 4K
         samples=256,
     )
@@ -85,8 +88,8 @@ def example_cosmic_web_visualization():
     print("\n3. Interactive exploration (Open3D)")
     create_visualization(
         spatial_data,
-        backend='open3d',
-        visualization_type='cosmic_web',
+        backend="open3d",
+        visualization_type="cosmic_web",
         show_bounds=True,
         compute_normals=True,
     )
@@ -94,19 +97,19 @@ def example_cosmic_web_visualization():
     print("\n4. Web-ready visualization (Plotly)")
     create_visualization(
         spatial_data,
-        backend='plotly',
-        visualization_type='cosmic_web',
-        export_formats=['html'],
-        output_name='cosmic_web_interactive',
+        backend="plotly",
+        visualization_type="cosmic_web",
+        export_formats=["html"],
+        output_name="cosmic_web_interactive",
     )
 
     print("\n5. Unified pipeline (all backends)")
     result_unified = unified_pipeline.create_visualization(
         spatial_data,
-        visualization_type='cosmic_web',
-        effects=['glow', 'filaments'],
-        export_formats=['png', 'html', 'ply'],
-        output_dir='./cosmic_web_outputs',
+        visualization_type="cosmic_web",
+        effects=["glow", "filaments"],
+        export_formats=["png", "html", "ply"],
+        output_dir="./cosmic_web_outputs",
     )
 
     return result_unified
@@ -125,7 +128,7 @@ def example_stellar_neighborhood():
     dec = np.random.uniform(-90, 90, n_stars) * u.deg
 
     # Create SkyCoord objects
-    coords = SkyCoord(ra=ra, dec=dec, distance=distances, frame='icrs')
+    coords = SkyCoord(ra=ra, dec=dec, distance=distances, frame="icrs")
 
     # Convert to cartesian for visualization
     cartesian = coords.cartesian
@@ -140,24 +143,28 @@ def example_stellar_neighborhood():
     pmdec = np.random.normal(0, 20, n_stars) * u.mas / u.yr
 
     # Create tensor dict
-    stellar_data = SpatialTensorDict({
-        'coordinates': torch.tensor(positions.value, dtype=torch.float32),
-        'temperature': torch.tensor(temperatures.value, dtype=torch.float32),
-        'luminosity': torch.tensor(luminosities.value, dtype=torch.float32),
-        'pmra': torch.tensor(pmra.value, dtype=torch.float32),
-        'pmdec': torch.tensor(pmdec.value, dtype=torch.float32),
-    }, coordinate_system='icrs', unit='pc')
+    stellar_data = SpatialTensorDict(
+        {
+            "coordinates": torch.tensor(positions.value, dtype=torch.float32),
+            "temperature": torch.tensor(temperatures.value, dtype=torch.float32),
+            "luminosity": torch.tensor(luminosities.value, dtype=torch.float32),
+            "pmra": torch.tensor(pmra.value, dtype=torch.float32),
+            "pmdec": torch.tensor(pmdec.value, dtype=torch.float32),
+        },
+        coordinate_system="icrs",
+        unit="pc",
+    )
 
     # Visualize with color and size mapping
     result = plot_stellar_data(
         stellar_data,
-        color_by='temperature',  # Color by temperature (blackbody)
-        size_by='luminosity',    # Size by luminosity
-        show_vectors=True,       # Show proper motion vectors
-        vector_property='pm',    # Proper motion vectors
-        effects=['glow'],        # Stellar glow effect
-        export_formats=['png', 'html'],
-        output_name='stellar_neighborhood',
+        color_by="temperature",  # Color by temperature (blackbody)
+        size_by="luminosity",  # Size by luminosity
+        show_vectors=True,  # Show proper motion vectors
+        vector_property="pm",  # Proper motion vectors
+        effects=["glow"],  # Stellar glow effect
+        export_formats=["png", "html"],
+        output_name="stellar_neighborhood",
     )
 
     return result
@@ -200,25 +207,31 @@ def example_galaxy_morphology():
     all_sfr = np.concatenate([sfr, sfr_bulge])
 
     # Create galaxy data
-    galaxy_data = SpatialTensorDict({
-        'coordinates': torch.tensor(all_positions, dtype=torch.float32),
-        'star_formation_rate': torch.tensor(all_sfr, dtype=torch.float32),
-        'component': torch.cat([
-            torch.zeros(n_points, dtype=torch.long),  # Disk
-            torch.ones(n_bulge, dtype=torch.long),    # Bulge
-        ]),
-    }, coordinate_system='galactocentric', unit='kpc')
+    galaxy_data = SpatialTensorDict(
+        {
+            "coordinates": torch.tensor(all_positions, dtype=torch.float32),
+            "star_formation_rate": torch.tensor(all_sfr, dtype=torch.float32),
+            "component": torch.cat(
+                [
+                    torch.zeros(n_points, dtype=torch.long),  # Disk
+                    torch.ones(n_bulge, dtype=torch.long),  # Bulge
+                ]
+            ),
+        },
+        coordinate_system="galactocentric",
+        unit="kpc",
+    )
 
     # Create multi-view visualization
     result = unified_pipeline.create_visualization(
         galaxy_data,
-        visualization_type='galaxy',
-        effects=['volumetric', 'bloom'],
-        color_by='star_formation_rate',
-        colormap='magma',
-        camera_views=['face-on', 'edge-on', 'perspective'],
-        export_formats=['png', 'blend'],
-        output_name='spiral_galaxy',
+        visualization_type="galaxy",
+        effects=["volumetric", "bloom"],
+        color_by="star_formation_rate",
+        colormap="magma",
+        camera_views=["face-on", "edge-on", "perspective"],
+        export_formats=["png", "blend"],
+        output_name="spiral_galaxy",
     )
 
     return result
@@ -234,29 +247,33 @@ def example_publication_figure():
     redshifts = np.random.uniform(0, 2, n_objects)
     masses = np.random.lognormal(12, 1, n_objects)  # log10(M/M_sun)
 
-    data = SpatialTensorDict({
-        'coordinates': torch.tensor(positions, dtype=torch.float32),
-        'redshift': torch.tensor(redshifts, dtype=torch.float32),
-        'mass': torch.tensor(masses, dtype=torch.float32),
-    }, coordinate_system='comoving', unit='Mpc')
+    data = SpatialTensorDict(
+        {
+            "coordinates": torch.tensor(positions, dtype=torch.float32),
+            "redshift": torch.tensor(redshifts, dtype=torch.float32),
+            "mass": torch.tensor(masses, dtype=torch.float32),
+        },
+        coordinate_system="comoving",
+        unit="Mpc",
+    )
 
     # Create different figure styles
-    styles = ['scientific', 'presentation', 'poster']
+    styles = ["scientific", "presentation", "poster"]
 
     for style in styles:
-        output_path = f'figure_{style}.png'
+        output_path = f"figure_{style}.png"
 
         create_publication_figure(
             data,
             output_path=output_path,
-            figure_type='panel',
+            figure_type="panel",
             style=style,
-            visualization_type='cosmic_web',
-            color_by='redshift',
-            size_by='mass',
+            visualization_type="cosmic_web",
+            color_by="redshift",
+            size_by="mass",
             show_colorbar=True,
             show_scalebar=True,
-            title=f'Large Scale Structure ({style.capitalize()} Style)',
+            title=f"Large Scale Structure ({style.capitalize()} Style)",
         )
 
         print(f"Created {style} figure: {output_path}")
@@ -280,20 +297,13 @@ def example_astropy_integration():
     dec = np.random.uniform(-60, 60, 100) * u.deg
 
     # Convert to 3D comoving coordinates
-    coords = SkyCoord(
-        ra=ra,
-        dec=dec,
-        distance=comoving_distances,
-        frame='icrs'
-    )
+    coords = SkyCoord(ra=ra, dec=dec, distance=comoving_distances, frame="icrs")
 
     # Get cartesian coordinates
     cartesian = coords.cartesian
-    positions = np.vstack([
-        cartesian.x.to(u.Mpc),
-        cartesian.y.to(u.Mpc),
-        cartesian.z.to(u.Mpc)
-    ]).T
+    positions = np.vstack(
+        [cartesian.x.to(u.Mpc), cartesian.y.to(u.Mpc), cartesian.z.to(u.Mpc)]
+    ).T
 
     # Calculate physical properties
     luminosity_distances = cosmo.luminosity_distance(redshifts)
@@ -301,23 +311,23 @@ def example_astropy_integration():
 
     # Create data with full astropy integration
     cosmo_data = {
-        'coordinates': positions,
-        'redshift': redshifts,
-        'luminosity_distance': luminosity_distances,
-        'angular_diameter_distance': angular_diameter_distances,
-        'ra': ra,
-        'dec': dec,
+        "coordinates": positions,
+        "redshift": redshifts,
+        "luminosity_distance": luminosity_distances,
+        "angular_diameter_distance": angular_diameter_distances,
+        "ra": ra,
+        "dec": dec,
     }
 
     # Visualize with automatic unit handling
     result = create_visualization(
         cosmo_data,
-        visualization_type='cosmic_web',
-        color_by='redshift',
-        colormap='spectral',
+        visualization_type="cosmic_web",
+        color_by="redshift",
+        colormap="spectral",
         show_axes=True,
-        axis_labels=['X [Mpc]', 'Y [Mpc]', 'Z [Mpc]'],
-        title='Cosmological Distance Ladder',
+        axis_labels=["X [Mpc]", "Y [Mpc]", "Z [Mpc]"],
+        title="Cosmological Distance Ladder",
     )
 
     return result

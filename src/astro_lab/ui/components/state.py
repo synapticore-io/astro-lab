@@ -5,8 +5,8 @@ UI State Management for AstroLab
 Modern state management using Marimo's reactive patterns.
 """
 
-from typing import Dict, Any, Optional
 from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
 
 @dataclass
@@ -38,57 +38,63 @@ class AppState:
     current_accuracy: float = 0.0
 
     # Config state
-    data_config: Dict[str, Any] = field(default_factory=lambda: {
-        "survey_name": "gaia",
-        "max_samples": 10000,
-        "magnitude_limit": 15.0,
-    })
+    data_config: Dict[str, Any] = field(
+        default_factory=lambda: {
+            "survey_name": "gaia",
+            "max_samples": 10000,
+            "magnitude_limit": 15.0,
+        }
+    )
 
-    analysis_config: Dict[str, Any] = field(default_factory=lambda: {
-        "method": "cosmic_web",
-        "clustering_scales": [5.0, 10.0, 25.0, 50.0],
-        "min_samples": 5,
-    })
+    analysis_config: Dict[str, Any] = field(
+        default_factory=lambda: {
+            "method": "cosmic_web",
+            "clustering_scales": [5.0, 10.0, 25.0, 50.0],
+            "min_samples": 5,
+        }
+    )
 
-    training_config: Dict[str, Any] = field(default_factory=lambda: {
-        "model_type": "AstroGraphGNN",
-        "epochs": 100,
-        "batch_size": 32,
-        "learning_rate": 0.001,
-    })
+    training_config: Dict[str, Any] = field(
+        default_factory=lambda: {
+            "model_type": "AstroGraphGNN",
+            "epochs": 100,
+            "batch_size": 32,
+            "learning_rate": 0.001,
+        }
+    )
 
-    visualization_config: Dict[str, Any] = field(default_factory=lambda: {
-        "backend": "cosmograph",
-        "node_size": 2.0,
-        "edge_opacity": 0.3,
-    })
+    visualization_config: Dict[str, Any] = field(
+        default_factory=lambda: {
+            "backend": "cosmograph",
+            "node_size": 2.0,
+            "edge_opacity": 0.3,
+        }
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert state to dictionary."""
         return {
             # Data
-            "loaded_data": f"{type(self.loaded_data).__name__}" if self.loaded_data else None,
+            "loaded_data": f"{type(self.loaded_data).__name__}"
+            if self.loaded_data
+            else None,
             "selected_survey": self.selected_survey,
             "data_format": self.data_format,
             "n_objects": self.n_objects,
             "status": self.status,
-
             # Analysis
             "analysis_status": self.analysis_status,
             "analysis_method": self.analysis_method,
             "has_analysis_result": self.analysis_result is not None,
-
             # Visualization
             "viz_backend": self.viz_backend,
             "has_viz_result": self.visualization_result is not None,
-
             # Training
             "training_status": self.training_status,
             "current_epoch": self.current_epoch,
             "total_epochs": self.total_epochs,
             "current_loss": self.current_loss,
             "current_accuracy": self.current_accuracy,
-
             # Configs
             "data_config": self.data_config,
             "analysis_config": self.analysis_config,
@@ -122,13 +128,11 @@ def get_state() -> Dict[str, Any]:
 def set_state(new_state: Dict[str, Any]):
     """Set state (for backward compatibility)."""
     # This should be replaced with proper state updates
-    pass
 
 
 def update_state(**kwargs):
     """Update state fields (for backward compatibility)."""
     # This should be replaced with proper state updates
-    pass
 
 
 # Config helpers

@@ -161,14 +161,16 @@ class LightcurveTensorDict(
         """Object identifiers."""
         return self._metadata["object_ids"]
 
-    def extract_features(self, feature_types: Optional[List[str]] = None, **kwargs) -> Dict[str, torch.Tensor]:
+    def extract_features(
+        self, feature_types: Optional[List[str]] = None, **kwargs
+    ) -> Dict[str, torch.Tensor]:
         """
         Extract lightcurve features from the TensorDict.
-        
+
         Args:
             feature_types: Types of features to extract ('temporal', 'variability', 'periodic')
             **kwargs: Additional extraction parameters
-            
+
         Returns:
             Dictionary of extracted lightcurve features
         """
@@ -180,7 +182,9 @@ class LightcurveTensorDict(
             # Basic temporal features
             times = self.times
             features["baseline"] = times[:, -1] - times[:, 0]
-            features["n_observations"] = torch.full((self.n_objects,), self.times.shape[1], dtype=torch.float32)
+            features["n_observations"] = torch.full(
+                (self.n_objects,), self.times.shape[1], dtype=torch.float32
+            )
 
             # Cadence features
             time_diffs = torch.diff(times, dim=1)
@@ -193,17 +197,25 @@ class LightcurveTensorDict(
 
             features["mean_magnitude"] = torch.mean(mags, dim=1)
             features["magnitude_std"] = torch.std(mags, dim=1)
-            features["magnitude_range"] = torch.max(mags, dim=1)[0] - torch.min(mags, dim=1)[0]
+            features["magnitude_range"] = (
+                torch.max(mags, dim=1)[0] - torch.min(mags, dim=1)[0]
+            )
             features["amplitude"] = features["magnitude_range"] / 2.0
 
             # Coefficient of variation
-            features["coefficient_variation"] = features["magnitude_std"] / (features["mean_magnitude"] + 1e-10)
+            features["coefficient_variation"] = features["magnitude_std"] / (
+                features["mean_magnitude"] + 1e-10
+            )
 
             # Stetson variability index (simplified)
             if self.magnitude_errors is not None:
                 errors = self.magnitude_errors[:, :, 0]
-                weighted_residuals = (mags - features["mean_magnitude"].unsqueeze(1)) / (errors + 1e-10)
-                features["stetson_index"] = torch.mean(weighted_residuals**2, dim=1) - 1.0
+                weighted_residuals = (
+                    mags - features["mean_magnitude"].unsqueeze(1)
+                ) / (errors + 1e-10)
+                features["stetson_index"] = (
+                    torch.mean(weighted_residuals**2, dim=1) - 1.0
+                )
 
         if feature_types is None or "periodic" in feature_types:
             # Add periodic features if not already computed

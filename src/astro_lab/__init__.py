@@ -20,7 +20,7 @@ from pathlib import Path
 
 # Import data module with relative import
 # Core imports
-from . import cli, config, data, models, tensors, training, ui, widgets
+from . import data
 
 # Import config module with relative import
 from .config import (

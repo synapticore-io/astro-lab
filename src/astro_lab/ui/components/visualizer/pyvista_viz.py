@@ -5,14 +5,16 @@ PyVista Visualizer
 Scientific 3D visualization using PyVista.
 """
 
-import numpy as np
-from typing import Dict, Any
+from typing import Any, Dict
+
 import marimo as mo
+import numpy as np
 
 from astro_lab.widgets.alpv import (
-    create_pyvista_visualization,
     create_cosmic_web_visualization,
+    create_pyvista_visualization,
 )
+
 from .base import BaseVisualizer
 
 
@@ -20,10 +22,7 @@ class PyVistaVisualizer(BaseVisualizer):
     """PyVista-based visualizer for scientific rendering."""
 
     def create_visualization(
-        self,
-        coords: np.ndarray,
-        metadata: Dict[str, Any],
-        params: Dict[str, Any]
+        self, coords: np.ndarray, metadata: Dict[str, Any], params: Dict[str, Any]
     ) -> mo.Html:
         """Create PyVista visualization."""
         # Check for cosmic web features

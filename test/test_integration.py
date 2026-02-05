@@ -2,8 +2,6 @@
 Integration tests for AstroLab.
 """
 
-import warnings
-
 import pytest
 import torch
 

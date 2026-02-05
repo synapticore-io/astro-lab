@@ -18,7 +18,8 @@ class AlbpyNoiseTextureGroup(bpy.types.TextureNodeGroup):
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyNoiseTextureGroup)
 
-
     bpy.utils.register_class(AlbpyNoiseTextureGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyNoiseTextureGroup)

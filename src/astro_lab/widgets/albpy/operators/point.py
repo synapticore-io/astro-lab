@@ -22,7 +22,8 @@ class ALBPY_OT_CreatePoint(Operator):
 def register():
     # REMOVED: bpy.utils.register_class(ALBPY_OT_CreatePoint)
 
-
     bpy.utils.register_class(ALBPY_OT_CreatePoint)
+
+
 def unregister():
     bpy.utils.unregister_class(ALBPY_OT_CreatePoint)

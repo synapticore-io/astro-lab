@@ -7,7 +7,6 @@ Simple configuration management using Marimo UI elements.
 
 import marimo as mo
 
-
 from .training_config import create_training_config
 from .widget_config import create_widget_config as create_visualization_config
 

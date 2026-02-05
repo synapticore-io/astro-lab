@@ -87,7 +87,8 @@ class AlbpyHolographicShaderGroup(bpy.types.ShaderNodeGroup):
 def register():
     # REMOVED: bpy.utils.register_class(AlbpyHolographicShaderGroup)
 
-
     bpy.utils.register_class(AlbpyHolographicShaderGroup)
+
+
 def unregister():
     bpy.utils.unregister_class(AlbpyHolographicShaderGroup)

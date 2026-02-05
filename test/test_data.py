@@ -2,19 +2,11 @@
 Test data module and datasets for AstroLab.
 """
 
-from pathlib import Path
-
-import polars as pl
-import pytest
-import torch
-from torch_geometric.data import Data
-
 from astro_lab.data import (
     AstroLabDataModule,
     AstroLabInMemoryDataset,
     KNNSampler,
 )
-from astro_lab.models import AstroModel
 
 
 class TestDataModuleAPI:

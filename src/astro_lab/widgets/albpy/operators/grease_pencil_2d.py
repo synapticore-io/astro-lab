@@ -60,10 +60,11 @@ def register():
     # REMOVED: bpy.utils.register_class(ALBPY_OT_CreateMultiPanelPlot)
     # REMOVED: bpy.utils.register_class(ALBPY_OT_CreateComparisonPlot)
 
-
     bpy.utils.register_class(ALBPY_OT_CreateRadarChart)
     bpy.utils.register_class(ALBPY_OT_CreateMultiPanelPlot)
     bpy.utils.register_class(ALBPY_OT_CreateComparisonPlot)
+
+
 def unregister():
     bpy.utils.unregister_class(ALBPY_OT_CreateRadarChart)
     bpy.utils.unregister_class(ALBPY_OT_CreateMultiPanelPlot)
