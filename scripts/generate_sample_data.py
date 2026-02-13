@@ -41,7 +41,7 @@ def generate_sample_gaia_data(n_sources: int = 10000) -> pl.DataFrame:
     dec = np.random.uniform(-90, 90, n_sources)
     
     # Generate distances (parallax -> distance in parsecs)
-    parallax_mas = np.random.uniform(0.5, 50, n_sources)  # 0.5 to 50 mas
+    parallax_mas = np.random.uniform(0.5, 50, n_sources)  # 0.5 to 50 mas (20 to 2000 pc)
     distance_pc = 1000.0 / parallax_mas  # Convert to parsecs
     
     # Generate magnitudes

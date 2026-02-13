@@ -74,7 +74,9 @@ def download_survey_data(survey: str = "gaia", force: bool = False) -> list:
 def generate_simple_catalog(
     max_samples: Optional[int] = None,
     output_dir: Path = Path("data/catalogs"),
-    clustering_scales: list = None
+    clustering_scales: list = None,
+    batch_size: int = 100000,
+    sample_catalog_size: int = 10000
 ) -> Path:
     """
     Generate consolidated AstroLab catalog with cosmic web features.
@@ -83,6 +85,8 @@ def generate_simple_catalog(
         max_samples: Maximum number of samples to process
         output_dir: Output directory for catalog
         clustering_scales: Scales for cosmic web clustering in parsecs
+        batch_size: Batch size for cosmic web analysis (adjust based on memory)
+        sample_catalog_size: Size of sample catalog to generate
         
     Returns:
         Path to generated catalog
@@ -145,7 +149,7 @@ def generate_simple_catalog(
     
     # Run cosmic web analysis
     try:
-        analyzer = ScalableCosmicWebAnalyzer(max_points_per_batch=100000)
+        analyzer = ScalableCosmicWebAnalyzer(max_points_per_batch=batch_size)
         cw_results = analyzer.analyze_cosmic_web(
             coordinates=coordinates,
             scales=clustering_scales,
@@ -205,7 +209,7 @@ def generate_simple_catalog(
     gaia_df.write_parquet(catalog_path, compression="zstd")
     
     # Save sample
-    sample_size = min(10000, len(gaia_df))
+    sample_size = min(sample_catalog_size, len(gaia_df))
     sample_path = output_dir / "astrolab_catalog_v1_sample.parquet"
     gaia_df.head(sample_size).write_parquet(sample_path, compression="zstd")
     

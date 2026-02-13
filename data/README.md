@@ -92,9 +92,9 @@ The catalog includes quality-filtered data with:
 - Reliable photometry
 
 Filters applied (when available):
-- Parallax SNR > 5
-- RUWE < 1.4
-- Astrometric excess noise < 1.0
+- Parallax SNR > 5 (signal-to-noise ratio for distance measurement)
+- RUWE < 1.4 (Renormalized Unit Weight Error - measures astrometric solution quality)
+- Astrometric excess noise < 1.0 (indicates clean astrometric measurements)
 
 ## 💾 Data Size and Git
 
