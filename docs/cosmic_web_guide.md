@@ -10,6 +10,66 @@ The cosmic web module provides tools for analyzing the large-scale structure of 
 - **Galactic Scale**: Galaxy clusters and superclusters (Megaparsecs)  
 - **Exoplanet Scale**: Stellar neighborhoods and associations
 
+## AstroLab Consolidated Catalog
+
+AstroLab provides a **consolidated catalog** combining multiple surveys with pre-computed cosmic web features. This is the recommended starting point for most analyses.
+
+### Generate the Catalog
+
+```bash
+# Basic generation (Gaia only, 10k samples)
+python scripts/generate_astrolab_catalog.py --max-samples 10000
+
+# Multi-survey catalog
+python scripts/generate_astrolab_catalog.py \
+  --surveys gaia sdss twomass \
+  --max-samples 100000 \
+  --clustering-scales 5 10 25 50
+
+# Generate visualizations
+python scripts/generate_visualizations.py
+```
+
+### Use the Catalog
+
+```python
+import polars as pl
+
+# Load catalog
+catalog = pl.read_parquet("data/catalogs/astrolab_catalog_v1.parquet")
+
+# Filter by structure type at 10 pc scale
+# 0=Field, 1=Filament, 2=Void, 3=Node
+filaments = catalog.filter(pl.col("cosmic_web_class_10.0pc") == 1)
+nodes = catalog.filter(pl.col("cosmic_web_class_10.0pc") == 3)
+
+# Filter by density
+high_density = catalog.filter(pl.col("density_10.0pc") > threshold)
+
+# Combine filters
+dense_filaments = catalog.filter(
+    (pl.col("cosmic_web_class_10.0pc") == 1) &
+    (pl.col("density_10.0pc") > threshold)
+)
+```
+
+### Catalog Features
+
+The consolidated catalog includes:
+
+- **Multi-wavelength photometry**: Gaia (optical), SDSS (optical), 2MASS (near-IR)
+- **Astrometry**: RA, Dec, distance, proper motion, parallax
+- **3D Coordinates**: Cartesian (x, y, z) in parsecs
+- **Cosmic Web Classification**: At multiple scales (default: 5, 10, 25, 50 pc)
+  - 0 = Field (low-density regions)
+  - 1 = Filament (elongated structures)
+  - 2 = Void (underdense regions)
+  - 3 = Node (high-density clusters)
+- **Density Fields**: Local density at each scale
+- **Structure Metrics**: Anisotropy, connectivity measures
+
+See `data/README.md` for complete schema documentation and `examples/use_astrolab_catalog.py` for usage examples.
+
 ## Quick Start
 
 ### 1. Command Line Interface
@@ -28,19 +88,27 @@ astro-lab cosmic-web exoplanet --clustering-scales 10 25 50 100 200
 ### 2. Python API
 
 ```python
-from astro_lab.data import analyze_gaia_cosmic_web
-from astro_lab.widgets import CosmicWebVisualizer
+from astro_lab.data.analysis.cosmic_web import ScalableCosmicWebAnalyzer
+import torch
+
+# Create analyzer
+analyzer = ScalableCosmicWebAnalyzer(max_points_per_batch=100000)
 
 # Run analysis
-results = analyze_gaia_cosmic_web(
-    max_samples=100000,
-    clustering_scales=[5.0, 10.0, 25.0, 50.0],
+results = analyzer.analyze_cosmic_web(
+    coordinates=coordinates,  # torch.Tensor [N, 3]
+    scales=[5.0, 10.0, 25.0, 50.0],
+    use_adaptive_sampling=True
 )
 
-# Visualize results
-viz = CosmicWebVisualizer()
-fig = viz.plot_3d_structure(spatial_tensor, cluster_labels)
-fig.show()
+# Access results
+for scale in [5.0, 10.0, 25.0]:
+    scale_key = f"scale_{scale:.1f}"
+    scale_results = results["multi_scale"][scale_key]
+    
+    structure_class = scale_results["structure_class"]  # 0=Field, 1=Filament, 2=Void, 3=Node
+    density = scale_results["density"]
+    anisotropy = scale_results["anisotropy"]
 ```
 
 ### 3. Tensor Methods

@@ -22,6 +22,7 @@ docs/auto/
 # Data and results
 data/*
 !data/README.md
+!data/catalog_schema.md
 !data/catalogs/
 data/catalogs/*.parquet
 data/catalogs/*.csv
