@@ -2,6 +2,11 @@
 Train a GNN model on real Gaia DR3 data.
 
 This example demonstrates training with the actual Gaia data available in the project.
+You can also use the consolidated AstroLab catalog for multi-survey training.
+
+For using the AstroLab catalog:
+    1. Generate it first: python scripts/generate_astrolab_catalog.py
+    2. The catalog includes cosmic web features for enhanced training
 """
 
 import lightning.pytorch as pl
@@ -133,6 +138,19 @@ def main():
     print(
         f"\nTo view results: mlflow ui --backend-store-uri {data_paths['mlruns_dir']}"
     )
+    
+    print("\n" + "=" * 80)
+    print("💡 Advanced Training Options:")
+    print("=" * 80)
+    print("\n1. Use the consolidated AstroLab catalog:")
+    print("   - Generate catalog: python scripts/generate_astrolab_catalog.py")
+    print("   - Includes multi-survey data and cosmic web features")
+    print("   - Better for structure classification tasks")
+    print("\n2. Try different model architectures:")
+    print("   - Change 'conv_type' to: gcn, gat, sage, gin, pna")
+    print("\n3. Increase sample size for better performance:")
+    print("   - Set max_samples to 500000 or None (all data)")
+    print("\n" + "=" * 80 + "\n")
 
 
 if __name__ == "__main__":

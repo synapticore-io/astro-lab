@@ -6,6 +6,11 @@ Shows how to:
 1. Preprocess individual surveys (Gaia, SDSS, 2MASS)
 2. Cross-match between surveys
 3. Build a combined multi-wavelength graph
+4. Generate consolidated AstroLab catalog with cosmic web features
+5. Create visual outputs
+
+This example demonstrates the complete workflow from raw data to 
+publication-quality visualizations.
 """
 
 import logging
@@ -19,6 +24,15 @@ from astro_lab.data.cross_match import SurveyCrossMatcher
 from astro_lab.data.preprocessors.gaia import GaiaPreprocessor
 from astro_lab.data.preprocessors.sdss import SDSSPreprocessor
 from astro_lab.data.preprocessors.twomass import TwoMASSPreprocessor
+from astro_lab.data.analysis.cosmic_web import ScalableCosmicWebAnalyzer
+
+# Import visualization utilities
+try:
+    import plotly.graph_objects as go
+    HAS_PLOTLY = True
+except ImportError:
+    HAS_PLOTLY = False
+    print("⚠️  Plotly not available - visualizations will be skipped")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -149,7 +163,96 @@ def main():
     torch.save(combined_graph, graph_path)
     logger.info(f"Saved graph to {graph_path}")
 
-    # 6. Print statistics
+    # 6. Add cosmic web analysis
+    logger.info("\n=== Step 6: Cosmic Web Analysis ===")
+    
+    analyzer = ScalableCosmicWebAnalyzer(max_points_per_batch=50000)
+    clustering_scales = [5.0, 10.0, 25.0, 50.0]
+    
+    logger.info(f"Analyzing cosmic web at scales: {clustering_scales}")
+    cw_results = analyzer.analyze_cosmic_web(
+        coordinates=positions,
+        scales=clustering_scales,
+        use_adaptive_sampling=True
+    )
+    
+    # Add cosmic web classifications to dataframe
+    for i, scale in enumerate(clustering_scales):
+        scale_key = f"scale_{scale:.1f}"
+        if "multi_scale" in cw_results and scale_key in cw_results["multi_scale"]:
+            scale_results = cw_results["multi_scale"][scale_key]
+            
+            if "structure_class" in scale_results:
+                struct_class = scale_results["structure_class"].cpu().numpy()
+                filtered_df = filtered_df.with_columns(
+                    pl.Series(f"cosmic_web_class_{scale:.1f}pc", struct_class)
+                )
+            
+            if "density" in scale_results:
+                density = scale_results["density"].cpu().numpy()
+                filtered_df = filtered_df.with_columns(
+                    pl.Series(f"density_{scale:.1f}pc", density)
+                )
+    
+    # Save enhanced catalog with cosmic web features
+    enhanced_catalog_path = output_dir / "gaia_sdss_twomass_cosmicweb.parquet"
+    filtered_df.write_parquet(enhanced_catalog_path)
+    logger.info(f"Saved enhanced catalog to {enhanced_catalog_path}")
+    
+    # 7. Generate visualizations
+    if HAS_PLOTLY:
+        logger.info("\n=== Step 7: Generating Visualizations ===")
+        
+        vis_dir = Path("data/visualizations/examples")
+        vis_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create 3D visualization (sample for performance)
+        sample_size = min(5000, len(filtered_df))
+        sample_df = filtered_df.sample(n=sample_size, shuffle=True)
+        
+        x = sample_df.select(pos_cols[0]).to_numpy().flatten()
+        y = sample_df.select(pos_cols[1]).to_numpy().flatten()
+        z = sample_df.select(pos_cols[2]).to_numpy().flatten()
+        
+        # Get structure classification at 10 pc scale
+        class_col = "cosmic_web_class_10.0pc"
+        if class_col in sample_df.columns:
+            classes = sample_df[class_col].to_numpy()
+            class_names = {0: "Field", 1: "Filament", 2: "Void", 3: "Node"}
+            colors_map = {0: "#1f77b4", 1: "#ff7f0e", 2: "#2ca02c", 3: "#d62728"}
+            
+            labels = [class_names.get(int(c), f"Class {c}") for c in classes]
+            colors = [colors_map.get(int(c), "#gray") for c in classes]
+        else:
+            labels = ["Source"] * len(sample_df)
+            colors = ["#1f77b4"] * len(sample_df)
+        
+        fig = go.Figure(data=[go.Scatter3d(
+            x=x, y=y, z=z,
+            mode='markers',
+            marker=dict(size=2, color=colors, opacity=0.6),
+            text=labels,
+            hovertemplate='<b>%{text}</b><br>X: %{x:.1f} pc<br>Y: %{y:.1f} pc<br>Z: %{z:.1f} pc<extra></extra>'
+        )])
+        
+        fig.update_layout(
+            title="Multi-Survey Combined Catalog with Cosmic Web Structure",
+            scene=dict(
+                xaxis_title="X (parsec)",
+                yaxis_title="Y (parsec)",
+                zaxis_title="Z (parsec)",
+                bgcolor="black",
+            ),
+            paper_bgcolor="black",
+            font=dict(color="white"),
+            height=800
+        )
+        
+        vis_path = vis_dir / "combined_catalog_3d.html"
+        fig.write_html(vis_path)
+        logger.info(f"Saved 3D visualization to {vis_path}")
+    
+    # 8. Print statistics
     logger.info("\n=== Final Statistics ===")
     logger.info(f"Nodes: {combined_graph.num_nodes}")
     logger.info(f"Edges: {combined_graph.num_edges}")
@@ -169,6 +272,17 @@ def main():
 
 
 if __name__ == "__main__":
+    print("\n" + "=" * 80)
+    print("Multi-Survey Preprocessing and Cosmic Web Analysis")
+    print("=" * 80)
+    print("\nThis example demonstrates:")
+    print("  1. Preprocessing multiple astronomical surveys")
+    print("  2. Cross-matching between surveys")
+    print("  3. Building combined multi-wavelength graphs")
+    print("  4. Cosmic web structure analysis")
+    print("  5. Visual output generation")
+    print("\n" + "=" * 80 + "\n")
+    
     combined_graph = main()
 
     # Example: Select red giants using multi-wavelength data
@@ -208,3 +322,15 @@ if __name__ == "__main__":
             n_red_giants = red_giants_mask.sum().item()
             print(f"Found {n_red_giants:,} potential red giants")
             print(f"({n_red_giants / combined_graph.num_nodes * 100:.1f}% of sample)")
+    
+    print("\n" + "=" * 80)
+    print("💡 Next Steps:")
+    print("=" * 80)
+    print("\n1. Generate full AstroLab catalog:")
+    print("   python scripts/generate_astrolab_catalog.py --max-samples 100000")
+    print("\n2. Create visualizations:")
+    print("   python scripts/generate_visualizations.py")
+    print("\n3. Explore the catalog:")
+    print("   import polars as pl")
+    print("   catalog = pl.read_parquet('data/catalogs/astrolab_catalog_v1.parquet')")
+    print("\n" + "=" * 80 + "\n")

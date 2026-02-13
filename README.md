@@ -27,43 +27,111 @@ astro-lab cosmic-web gaia --max-samples 10000 --clustering-scales 5 10 25 --visu
 marimo run src/astro_lab/ui/app.py
 ```
 
+## 📊 AstroLab Consolidated Catalog
+
+AstroLab provides a **consolidated multi-survey catalog** with cosmic web structure classifications, combining data from Gaia, SDSS, and 2MASS.
+
+### Generate the Catalog
+
+```bash
+# Generate with default settings (Gaia only, 10k samples)
+python scripts/generate_astrolab_catalog.py --max-samples 10000
+
+# Generate with multiple surveys
+python scripts/generate_astrolab_catalog.py --surveys gaia sdss twomass --max-samples 50000
+
+# Generate with custom clustering scales
+python scripts/generate_astrolab_catalog.py --clustering-scales 5 10 25 50 100
+```
+
+### Features Included
+
+- **Multi-wavelength photometry**: Optical (Gaia, SDSS) + Near-IR (2MASS)
+- **Astrometry**: Positions, proper motions, parallaxes
+- **3D Coordinates**: Cartesian coordinates in parsecs
+- **Cosmic Web Classification**: Filament, void, node, field at multiple scales
+- **Density Fields**: Local density estimates at each scale
+- **Structure Metrics**: Anisotropy, connectivity, topology
+
+### Using the Catalog
+
+```python
+import polars as pl
+
+# Load the catalog
+catalog = pl.read_parquet("data/catalogs/astrolab_catalog_v1.parquet")
+
+# Filter by structure type (e.g., filaments at 10 pc scale)
+filaments = catalog.filter(pl.col("cosmic_web_class_10.0pc") == 1)
+
+# Get high-density regions
+high_density = catalog.filter(pl.col("density_10.0pc") > threshold)
+```
+
+### Generate Visualizations
+
+```bash
+# Create interactive 3D plots and statistical visualizations
+python scripts/generate_visualizations.py
+
+# Output: data/visualizations/*.html
+```
+
+See the [complete catalog documentation](data/README.md) and [example usage](examples/use_astrolab_catalog.py) for more details.
+
+
 ## 🎨 Visual Examples
 
 AstroLab provides powerful interactive 3D visualizations of cosmic web structures across multiple astronomical scales.
 
-### Coming Soon: Interactive Demos
+### Quick Visualization
 
-We're currently preparing stunning visual demonstrations of AstroLab's capabilities, including:
+Generate publication-quality visualizations from the AstroLab catalog:
 
-- **Interactive 3D Cosmic Web Visualization**: Real-time exploration of stellar neighborhoods and galaxy clusters using Cosmograph with physics-based simulation
-- **Multi-Scale Structure Analysis**: Visual comparison of clustering at different scales (stellar, galactic, cosmic)
-- **Filament Detection Examples**: 3D visualization of cosmic web filaments using MST, Morse theory, and Hessian analysis
-- **Graph Neural Network Architecture**: Interactive diagrams showing model architectures and data flow
-- **Live Marimo Dashboard**: Screenshots of the reactive notebook interface for cosmic web analysis
+```bash
+# Generate the catalog first
+python scripts/generate_astrolab_catalog.py --max-samples 10000
 
-### Preview Available Features
+# Create visualizations
+python scripts/generate_visualizations.py
 
-While screenshots are being prepared, you can explore these features yourself:
-
-```python
-from astro_lab.widgets.cosmograph_bridge import CosmographBridge
-from astro_lab.data.cosmic_web import analyze_gaia_cosmic_web
-
-# Analyze and visualize Gaia stellar data
-results = analyze_gaia_cosmic_web(max_samples=10000, clustering_scales=[5, 10, 25])
-bridge = CosmographBridge()
-widget = bridge.from_cosmic_web_results(results, survey_name="gaia")
-widget.show()  # Interactive 3D visualization with gold points
+# Open the generated HTML files in data/visualizations/
 ```
 
-Or start the interactive UI:
+### Available Visualizations
+
+- **Interactive 3D Cosmic Web**: Real-time exploration using Plotly with structure classification coloring
+- **Multi-Scale Comparison**: Side-by-side views of structures at different clustering scales
+- **Structure Distribution**: Statistical analysis of filaments, voids, nodes, and field regions
+- **Density Maps**: Local density field visualizations
+
+### Programmatic Usage
+
+```python
+from astro_lab.data.analysis.cosmic_web import ScalableCosmicWebAnalyzer
+import polars as pl
+
+# Analyze cosmic web structure
+analyzer = ScalableCosmicWebAnalyzer()
+catalog = pl.read_parquet("data/catalogs/astrolab_catalog_v1.parquet")
+
+# Extract coordinates
+coordinates = catalog.select(['x', 'y', 'z']).to_numpy()
+
+# Run analysis
+results = analyzer.analyze_cosmic_web(
+    coordinates,
+    scales=[5.0, 10.0, 25.0],
+    use_adaptive_sampling=True
+)
+```
+
+Or use the interactive UI:
 ```bash
 marimo run src/astro_lab/ui/app.py
 ```
 
 **Live Demo**: Visit our [GitHub Pages documentation](https://bjoernbethge.github.io/astro-lab/) for API documentation and guides (Documentation auto-deployed on every commit to main).
-
-> **Note**: Screenshots and GIFs will be added soon. Track progress in [docs/images/screenshots/.gitkeep](docs/images/screenshots/.gitkeep).
 
 ## 🧠 Astro GNN Models & Tasks
 

@@ -20,7 +20,17 @@ docs/auto/
 .idea/
 
 # Data and results
-data/
+data/*
+!data/README.md
+!data/catalog_schema.md
+!data/catalogs/
+data/catalogs/*.parquet
+data/catalogs/*.csv
+!data/visualizations/
+data/visualizations/*.png
+data/visualizations/*.jpg
+data/visualizations/*.html
+!data/visualizations/.gitkeep
 project_documentation/
 results/
 *.log
